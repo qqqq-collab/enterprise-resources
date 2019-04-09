@@ -1,3 +1,8 @@
 .envrc
 plan.out
 .terraform
+terraform.tfstate*
+terraform.tfvars
+plan.out
+.vagrant
+.kubeconfig
