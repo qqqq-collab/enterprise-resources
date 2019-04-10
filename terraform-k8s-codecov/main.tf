@@ -212,3 +212,50 @@ resource "kubernetes_deployment" "minio_gcs_proxy" {
     }
   }
 }
+
+resource "kubernetes_deployment" "traefik" {
+  metadata {
+    name = "traefik"
+  }
+  spec {
+    replicas = 2
+    selector {
+      match_labels {
+        app = "traefik"
+      }
+    }
+    template {
+      metadata {
+        labels {
+          app = "traefik"
+        }
+      }
+      spec {
+        container {
+          name  = "traefik"
+          image = "traefik:v1.7-alpine"
+          args = [
+            "--entryPoints=Name:http Address::80 Compress::true",
+            "--defaultEntryPoints=http"
+          ]
+          port {
+            container_port = 80
+          }
+          resources {
+            limits {
+              cpu    = "256m"
+              memory = "512M"
+            }
+            requests {
+              cpu    = "32m"
+              memory = "64M"
+            }
+          }
+        }
+      }
+    }
+    strategy {
+      type = "Recreate"
+    }
+  }
+}
