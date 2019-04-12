@@ -33,6 +33,22 @@ resource "kubernetes_deployment" "web" {
           port {
             container_port = 5000
           }
+          env {
+            name = "STATSD_HOST"
+            value_from {
+              field_ref {
+                field_path = "status.hostIP"
+              }
+            }
+          }
+          env {
+            name = "MINIO_PORT_9000_TCP_ADDR"
+            value = "minio"
+          }
+          env {
+            name = "MINIO_PORT_9000_TCP_PORT"
+            value = "9000"
+          }
           resources {
             limits {
               cpu    = "256m"
@@ -68,7 +84,7 @@ resource "kubernetes_deployment" "worker" {
     name = "worker"
   }
   spec {
-    replicas = 2
+    replicas = "${var.worker_replicas}"
     selector {
       match_labels {
         app = "worker"
@@ -95,6 +111,22 @@ resource "kubernetes_deployment" "worker" {
             name  = "REDIS_URL"
             value = "redis://${var.redis_host}"
           }
+          env {
+            name = "STATSD_HOST"
+            value_from {
+              field_ref {
+                field_path = "status.hostIP"
+              }
+            }
+          }
+          env {
+            name = "MINIO_PORT_9000_TCP_ADDR"
+            value = "minio"
+          }
+          env {
+            name = "MINIO_PORT_9000_TCP_PORT"
+            value = "9000"
+          }
           resources {
             limits {
               cpu    = "512m"
@@ -120,40 +152,33 @@ resource "kubernetes_deployment" "worker" {
   }
 }
 
-resource "kubernetes_deployment" "minio_gcs_proxy" {
+resource "kubernetes_deployment" "minio_storage" {
   metadata {
-    name = "minio-gcs-proxy"
+    name = "minio"
   }
   spec {
-    replicas = 2
+    replicas = "${var.minio_replicas}"
     selector {
       match_labels {
-        app = "minio-gcs-proxy"
+        app = "minio-storage"
       }
     }
     template {
       metadata {
         labels {
-          app = "minio-gcs-proxy"
+          app = "minio-storage"
         }
       }
       spec {
         volume {
-          name = "gcs-credentials"
-          secret {
-            secret_name = "${kubernetes_secret.gcs-credentials.metadata.0.name}"
-          }
+          name = "storage"
         }
         container {
           name  = "minio"
-          image = "minio/minio:RELEASE.2018-07-23T18-34-49Z"
-          args  = ["gateway", "gcs", "codecov-enterprise-sandbox"]
+          image = "minio/minio:RELEASE.2019-04-09T01-22-30Z"
+          args  = ["gateway", "nas", "/storage"]
           port {
             container_port = 9000
-          }
-          env {
-            name  = "GOOGLE_APPLICATION_CREDENTIALS"
-            value = "/etc/credentials/gcs-credentials.json"
           }
           env {
             name = "MINIO_ACCESS_KEY"
@@ -200,56 +225,9 @@ resource "kubernetes_deployment" "minio_gcs_proxy" {
             period_seconds        = 5
           }
           volume_mount {
-            name       = "gcs-credentials"
-            read_only  = "true"
-            mount_path = "/etc/credentials"
-          }
-        }
-      }
-    }
-    strategy {
-      type = "Recreate"
-    }
-  }
-}
-
-resource "kubernetes_deployment" "traefik" {
-  metadata {
-    name = "traefik"
-  }
-  spec {
-    replicas = 2
-    selector {
-      match_labels {
-        app = "traefik"
-      }
-    }
-    template {
-      metadata {
-        labels {
-          app = "traefik"
-        }
-      }
-      spec {
-        container {
-          name  = "traefik"
-          image = "traefik:v1.7-alpine"
-          args = [
-            "--entryPoints=Name:http Address::80 Compress::true",
-            "--defaultEntryPoints=http"
-          ]
-          port {
-            container_port = 80
-          }
-          resources {
-            limits {
-              cpu    = "256m"
-              memory = "512M"
-            }
-            requests {
-              cpu    = "32m"
-              memory = "64M"
-            }
+            name       = "storage"
+            read_only  = "false"
+            mount_path = "/storage"
           }
         }
       }

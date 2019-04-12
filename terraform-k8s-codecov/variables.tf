@@ -1,130 +1,29 @@
-
 variable "config_context" {
   description = "Kubernetes config context used to connect to the target cluster"
 }
 
 variable "web_replicas" {
   description = "Number of web replicas to deploy"
+  default = "2"
 }
 
-variable "codecov_url" {
-  description = "codecov_url"
-  default = ""
+variable "worker_replicas" {
+  description = "Number of worker replicas to deploy"
+  default = "2"
 }
 
-variable "enterprise_license" {
-  description = "enterprise_license"
-  default = ""
+variable "minio_replicas" {
+  description = "Number of minio replicas to deploy"
+  default = "2"
 }
 
-variable "guest_access" {
-  description = "guest_access"
-  default = ""
+variable "traefik_replicas" {
+  description = "Number of traefik replicas to deploy"
+  default = "2"
 }
 
-variable "cookie_secret" {
-  description = "cookie_secret"
-  default = ""
-}
-
-variable "github_client_id" {
-  description = "github_client_id"
-  default = ""
-}
-
-variable "github_client_secret" {
-  description = "github_client_secret"
-  default = ""
-}
-
-variable "github_global_upload_token" {
-  description = "github_global_upload_token"
-  default = ""
-}
-
-variable "github_enterprise_url" {
-  description = "github_enterprise_url"
-  default = ""
-}
-
-variable "github_enterprise_api_url" {
-  description = "github_enterprise_api_url"
-  default = ""
-}
-
-variable "github_enterprise_client_id" {
-  description = "github_enterprise_client_id"
-  default = ""
-}
-
-variable "github_enterprise_client_secret" {
-  description = "github_enterprise_client_secret"
-  default = ""
-}
-
-variable "github_enterprise_global_upload_token" {
-  description = "github_enterprise_global_upload_token"
-  default = ""
-}
-
-variable "bitbucket_client_id" {
-  description = "bitbucket_client_id"
-  default = ""
-}
-
-variable "bitbucket_client_secret" {
-  description = "bitbucket_client_secret"
-  default = ""
-}
-
-variable "bitbucket_global_upload_token" {
-  description = "bitbucket_global_upload_token"
-  default = ""
-}
-
-variable "bitbucket_server_url" {
-  description = "bitbucket_server_url"
-  default = ""
-}
-
-variable "bitbucket_server_client_id" {
-  description = "bitbucket_server_client_id"
-  default = ""
-}
-
-variable "bitbucket_server_global_upload_token" {
-  description = "bitbucket_server_global_upload_token"
-  default = ""
-}
-
-variable "gitlab_enterprise_url" {
-  description = "gitlab_enterprise_url"
-  default = ""
-}
-
-variable "gitlab_enterprise_client_id" {
-  description = "gitlab_enterprise_client_id"
-  default = ""
-}
-
-variable "gitlab_enterprise_client_secret" {
-  description = "gitlab_enterprise_client_secret"
-  default = ""
-}
-
-variable "gitlab_enterprise_ssl_pem" {
-  description = "gitlab_enterprise_ssl_pem"
-  default = ""
-}
-
-variable "gitlab_enterprise_global_upload_token" {
-  description = "gitlab_enterprise_global_upload_token"
-  default = ""
-}
-
-variable "ci_providers" {
-  description = "ci_providers"
-  default = ""
+variable "codecov_yml" {
+  description = "Location of your codecov.yml file"
 }
 
 variable "database_username" {

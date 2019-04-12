@@ -34,3 +34,5 @@ services:
   redis_url: redis://${redis_host}:${redis_port}
   minio: 
     hash_key: "ab164bf3f7d947f2a0681b215404873e" #do not edit
+    access_key_id: ${minio_access_key}
+    secret_access_key: ${minio_secret_key}
