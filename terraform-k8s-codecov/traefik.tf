@@ -161,10 +161,43 @@ resource "kubernetes_service" "traefik" {
   }
 }
 
+data "template_file" "traefik-ingress" {
+  template = <<EOF
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: traefik-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: ${var.ingress_host}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: web
+          servicePort: 5000
+      - path: /archive
+        backend:
+          serviceName: minio
+          servicePort: 9000
+      - path: /minio
+        backend:
+          serviceName: minio
+          servicePort: 9000
+EOF
+}
+
 # work around kubernetes provider's lack of a kubernetes_ingress resource
 resource "null_resource" "traefik-ingress" {
   provisioner "local-exec" "traefik-ingress" {
-    command = "kubectl create -f \"${path.module}/traefik-ingress.yml\""
+    command = "cat <<EOF | kubectl create -f - \n${data.template_file.traefik-ingress.rendered}\nEOF"
+  }
+
+  provisioner "local-exec" "traefik-ingress" {
+    when = "destroy"
+    command = "kubectl delete ingress traefik-ingress"
   }
 
   depends_on = ["kubernetes_service.traefik"]

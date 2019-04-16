@@ -17,6 +17,11 @@ variable "minio_replicas" {
   default = "2"
 }
 
+variable "ingress_host" {
+  description = "Hostname used for ingress"
+  default = "codecov-ingress"
+}
+
 variable "traefik_replicas" {
   description = "Number of traefik replicas to deploy"
   default = "2"
