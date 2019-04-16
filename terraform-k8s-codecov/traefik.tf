@@ -131,3 +131,32 @@ resource "kubernetes_deployment" "traefik" {
   }
 }
 
+resource "kubernetes_service" "traefik" {
+  metadata {
+    name = "traefik"
+  }
+  spec {
+    port {
+      name = "http"
+      protocol    = "TCP"
+      port        = "80"
+      target_port = "80"
+    }
+    port {
+      name = "https"
+      protocol    = "TCP"
+      port        = "443"
+      target_port = "443"
+    }
+    port {
+      name = "admin"
+      protocol    = "TCP"
+      port        = "8080"
+      target_port = "8080"
+    }
+    selector {
+      app = "traefik-ingress-controller"
+    }
+    type = "NodePort"
+  }
+}
