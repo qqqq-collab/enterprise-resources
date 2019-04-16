@@ -160,3 +160,12 @@ resource "kubernetes_service" "traefik" {
     type = "NodePort"
   }
 }
+
+# work around kubernetes provider's lack of a kubernetes_ingress resource
+resource "null_resource" "traefik-ingress" {
+  provisioner "local-exec" "traefik-ingress" {
+    command = "kubectl create -f \"${path.module}/traefik-ingress.yml\""
+  }
+
+  depends_on = ["kubernetes_service.traefik"]
+}
