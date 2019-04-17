@@ -15,7 +15,7 @@ kubernetes cluster.
 - A redis server configured to allow connections from your k8s cluster.
 - An NFS server configured to allow connections from your k8s cluster.
 
-## Parameters
+## Module Parameters
 
 | name | description | default |
 | --- | --- | --- |
@@ -48,7 +48,7 @@ kubernetes cluster.
       worker_replicas = "2"
       minio_replicas = "4"
       codecov_yml = "path/to/codecov.yml"
-      nfs_pv_host = "10.0.0.1"
+      nfs_pv_host = "nfs.server.hostname"
       nfs_pv_path = "/exports/minio"
       nfs_pv_size = "10Gi"
       minio_access_key = "access_key"
