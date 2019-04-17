@@ -2,9 +2,11 @@
 plan.out
 .terraform
 terraform.tfstate*
+.terraform.tfstate*
 terraform.tfvars
 plan.out
 .vagrant
 .kubeconfig
 vagrant/creds/
 codecov.yml
+creds/*

@@ -3,43 +3,18 @@ variable "codecov_yml" {
   default = ""
 }
 
-variable "database_username" {
-  description = "database_username"
+variable "nfs_pv_host" {
+  description = "nfs_pv_host"
   default = ""
 }
 
-variable "database_password" {
-  description = "database_password"
+variable "nfs_pv_path" {
+  description = "nfs_pv_path"
   default = ""
 }
 
-variable "database_host" {
-  description = "database_host"
-  default = ""
-}
-
-variable "database_port" {
-  description = "database_port"
-  default = "5432"
-}
-
-variable "database_name" {
-  description = "database_name"
-  default = ""
-}
-
-variable "redis_username" {
-  description = "redis_username"
-  default = ""
-}
-
-variable "redis_password" {
-  description = "redis_password"
-  default = ""
-}
-
-variable "redis_host" {
-  description = "redis_host"
+variable "nfs_pv_size" {
+  description = "nfs_pv_size"
   default = ""
 }
 
