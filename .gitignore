@@ -9,4 +9,4 @@ plan.out
 .kubeconfig
 vagrant/creds/
 codecov.yml
-creds/*
+*/creds/*
