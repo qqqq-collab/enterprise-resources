@@ -18,6 +18,9 @@ resource "kubernetes_deployment" "minio_storage" {
       spec {
         volume {
           name = "storage"
+          persistent_volume_claim {
+            claim_name = "${kubernetes_persistent_volume_claim.minio.metadata.0.name}"
+          }
         }
         container {
           name  = "minio"
@@ -97,5 +100,39 @@ resource "kubernetes_service" "minio" {
     selector {
       app = "minio-storage"
     }
+  }
+}
+
+resource "kubernetes_persistent_volume" "minio" {
+  metadata {
+    name = "minio-nfs"
+  }
+  spec {
+    capacity {
+      storage = "${var.nfs_pv_size}"
+    }
+    access_modes = ["ReadWriteMany"]
+    persistent_volume_source {
+      nfs {
+        path = "${var.nfs_pv_path}"
+        read_only = "false"
+        server = "${var.nfs_pv_host}"
+      }
+    }
+  }
+}
+
+resource "kubernetes_persistent_volume_claim" "minio" {
+  metadata {
+    name = "minio-nfs"
+  }
+  spec {
+    access_modes = ["ReadWriteMany"]
+    resources {
+      requests {
+        storage = "${var.nfs_pv_size}"
+      }
+    }
+    volume_name = "${kubernetes_persistent_volume.minio.metadata.0.name}"
   }
 }

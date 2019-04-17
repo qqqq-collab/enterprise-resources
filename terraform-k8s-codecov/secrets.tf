@@ -24,3 +24,14 @@ resource "kubernetes_secret" "minio-secret-key" {
     MINIO_SECRET_KEY = "${var.minio_secret_key}"
   }
 }
+
+resource "kubernetes_secret" "traefik-tls" {
+  metadata {
+    name = "traefik-tls"
+  }
+  type = "tls"
+  data {
+    tls.key = "${file("${var.tls_key}")}"
+    tls.crt = "${file("${var.tls_cert}")}"
+  }
+}

@@ -40,12 +40,40 @@ resource "kubernetes_cluster_role_binding" "traefik_ingress_controller" {
   }
 }
 
+data "template_file" "traefik-toml-http" {
+  count = "${1 - var.enable_https}"
+  template = <<EOF
+defaultEntryPoints = ["http"]
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+EOF
+}
+
+data "template_file" "traefik-toml-https" {
+  count = "${var.enable_https}"
+  template = <<EOF
+defaultEntryPoints = ["http","https"]
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+      entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+    [entryPoints.https.tls]
+      [[entryPoints.https.tls.certificates]]
+      CertFile = "/cert/tls.crt"
+      KeyFile = "/cert/tls.key"
+EOF
+}
+
 resource "kubernetes_config_map" "traefik-toml" {
   metadata {
     name = "traefik-config"
   }
   data {
-    "traefik.toml" = "${file("${path.module}/traefik.toml")}"
+    "traefik.toml" = "${element(concat(data.template_file.traefik-toml-http.*.rendered,data.template_file.traefik-toml-https.*.rendered),0)}"
   }
 }
 
@@ -72,6 +100,12 @@ resource "kubernetes_deployment" "traefik" {
           name = "config"
           config_map {
             name = "traefik-config"
+          }
+        }
+        volume {
+          name = "cert"
+          secret {
+            secret_name = "traefik-tls"
           }
         }
         volume {
@@ -113,6 +147,11 @@ resource "kubernetes_deployment" "traefik" {
             name = "config"
             read_only = "true"
             mount_path = "/config"
+          }
+          volume_mount {
+            name = "cert"
+            read_only = "true"
+            mount_path = "/cert"
           }
           # when using terraform, you must explicitly mount the service account secret volume
           # https://github.com/kubernetes/kubernetes/issues/27973

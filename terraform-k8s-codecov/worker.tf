@@ -27,10 +27,6 @@ resource "kubernetes_deployment" "worker" {
           image = "codecov/enterprise:v4.4.4"
           args  = ["worker", "--queue celery,uploads", "--concurrency 1"]
           env {
-            name  = "REDIS_URL"
-            value = "redis://${var.redis_host}"
-          }
-          env {
             name = "STATSD_HOST"
             value_from {
               field_ref {

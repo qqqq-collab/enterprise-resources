@@ -1,5 +1,5 @@
 variable "config_context" {
-  description = "Kubernetes config context used to connect to the target cluster"
+  description = "kubectl config context used to connect to the target cluster"
 }
 
 variable "web_replicas" {
@@ -18,8 +18,7 @@ variable "minio_replicas" {
 }
 
 variable "ingress_host" {
-  description = "Hostname used for ingress"
-  default = "codecov-ingress"
+  description = "Hostname used for http(s) ingress"
 }
 
 variable "traefik_replicas" {
@@ -27,71 +26,43 @@ variable "traefik_replicas" {
   default = "2"
 }
 
+variable "enable_https" {
+  description = "Enables https ingress.  Requires TLS cert and key"
+  default = "0"
+}
+
+variable "tls_key" {
+  description = "Path to private key to use for TLS"
+  default = ""
+}
+
+variable "tls_cert" {
+  description = "Path to certificate to use for TLS"
+  default = ""
+}
+
 variable "codecov_yml" {
   description = "Location of your codecov.yml file"
 }
 
-variable "database_username" {
-  description = "database_username"
-  default = ""
+variable "nfs_pv_host" {
+  description = "Host for NFS persistent volume"
 }
 
-variable "database_password" {
-  description = "database_password"
-  default = ""
+variable "nfs_pv_path" {
+  description = "Export path for NFS persistent volume"
 }
 
-variable "database_host" {
-  description = "database_host"
-  default = ""
-}
-
-variable "database_port" {
-  description = "database_port"
-  default = "5432"
-}
-
-variable "database_name" {
-  description = "database_name"
-  default = "codecov"
-}
-
-variable "redis_username" {
-  description = "redis_username"
-  default = ""
-}
-
-variable "redis_password" {
-  description = "redis_password"
-  default = ""
-}
-
-variable "redis_host" {
-  description = "redis_host"
-  default = ""
-}
-
-variable "redis_port" {
-  description = "redis_port"
-  default = "6379"
-}
-
-variable "redis_name" {
-  description = "redis_name"
-  default = ""
-}
-
-variable "gcs_credentials_json" {
-  description = "Path to json file containing google cloud credentials"
-  default = ""
+variable "nfs_pv_size" {
+  description = "NFS persistent volume size"
 }
 
 variable "minio_access_key" {
-  description = "minio access key"
+  description = "Access key for minio"
   default = ""
 }
 
 variable "minio_secret_key" {
-  description = "minio secret key"
+  description = "Secret key for minio"
   default = ""
 }
