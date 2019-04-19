@@ -25,9 +25,9 @@ resource "kubernetes_deployment" "minio_storage" {
           role = "minio"
         }
         volume {
-          name = "minio-gcs-creds"
+          name = "minio-service-account"
           secret {
-            secret_name = "${kubernetes_secret.minio-gcs-creds.metadata.0.name}"
+            secret_name = "${kubernetes_secret.minio-service-account.metadata.0.name}"
           }
         }
         container {
@@ -39,7 +39,7 @@ resource "kubernetes_deployment" "minio_storage" {
           }
           env {
             name = "GOOGLE_APPLICATION_CREDENTIALS"
-            value = "/creds/minio-gcs-creds.json"
+            value = "/creds/minio-credentials.json"
           }
           env {
             name = "MINIO_ACCESS_KEY"
@@ -86,7 +86,7 @@ resource "kubernetes_deployment" "minio_storage" {
             period_seconds        = 5
           }
           volume_mount {
-            name = "minio-gcs-creds"
+            name = "minio-service-account"
             read_only = "true"
             mount_path = "/creds"
           }

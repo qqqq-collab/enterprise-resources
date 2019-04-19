@@ -1,12 +1,3 @@
-resource "kubernetes_secret" "minio-gcs-creds" {
-  metadata {
-    name = "minio-gcs-creds"
-  }
-  data {
-    "minio-gcs-creds.json" = "${file("${var.minio_gcs_creds}")}"
-  }
-}
-
 resource "kubernetes_secret" "minio-access-key" {
   metadata {
     name = "minio-access-key"
@@ -31,5 +22,16 @@ resource "kubernetes_secret" "codecov-yml" {
   }
   data {
     "codecov.yml" = "${file("${var.codecov_yml}")}"
+  }
+}
+
+resource "kubernetes_secret" "traefik-tls" {
+  metadata {
+    name = "traefik-tls"
+  }
+  type = "tls"
+  data {
+    tls.key = "${file("${var.tls_key}")}"
+    tls.crt = "${file("${var.tls_cert}")}"
   }
 }

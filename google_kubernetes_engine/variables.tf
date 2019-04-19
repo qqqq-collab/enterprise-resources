@@ -85,3 +85,27 @@ variable "codecov_yml" {
   description = "Path to your codecov.yml"
   default = "codecov.yml"
 }
+
+variable "ingress_host" {
+  description = "Hostname used for http(s) ingress"
+}
+
+variable "traefik_replicas" {
+  description = "Number of traefik replicas to deploy"
+  default = "2"
+}
+
+variable "enable_https" {
+  description = "Enables https ingress.  Requires TLS cert and key"
+  default = "0"
+}
+
+variable "tls_key" {
+  description = "Path to private key to use for TLS"
+  default = ""
+}
+
+variable "tls_cert" {
+  description = "Path to certificate to use for TLS"
+  default = ""
+}

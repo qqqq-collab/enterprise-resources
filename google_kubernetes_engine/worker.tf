@@ -1,18 +1,18 @@
-resource "kubernetes_deployment" "web" {
+resource "kubernetes_deployment" "worker" {
   metadata {
-    name = "web"
+    name = "worker"
   }
   spec {
-    replicas = "${var.web_replicas}"
+    replicas = "${var.worker_replicas}"
     selector {
       match_labels {
-        app = "web"
+        app = "worker"
       }
     }
     template {
       metadata {
         labels {
-          app = "web"
+          app = "worker"
         }
       }
       spec {
@@ -23,12 +23,9 @@ resource "kubernetes_deployment" "web" {
           }
         }
         container {
-          name  = "web"
+          name  = "workers"
           image = "codecov/enterprise:v4.4.4"
-          args  = ["web"]
-          port {
-            container_port = 5000
-          }
+          args  = ["worker", "--queue celery,uploads", "--concurrency 1"]
           env {
             name = "STATSD_HOST"
             value_from {
@@ -63,25 +60,17 @@ resource "kubernetes_deployment" "web" {
           }
           env {
             name = "SERVICES__MINIO__BUCKET"
-            value = "${google_storage_bucket.minio.name}"
+            value = "${var.minio_bucket_name}"
           }
           resources {
             limits {
-              cpu    = "256m"
-              memory = "512M"
+              cpu    = "512m"
+              memory = "2048M"
             }
             requests {
-              cpu    = "32m"
-              memory = "64M"
+              cpu    = "256m"
+              memory = "2048M"
             }
-          }
-          readiness_probe {
-            http_get {
-              path = "/login"
-              port = "5000"
-            }
-            initial_delay_seconds = 5
-            period_seconds        = 5
           }
           image_pull_policy = "Always"
           volume_mount {
@@ -116,21 +105,8 @@ resource "kubernetes_deployment" "web" {
         }
       }
     }
-  }
-}
-
-resource "kubernetes_service" "web" {
-  metadata {
-    name = "web"
-  }
-  spec {
-    port {
-      protocol    = "TCP"
-      port        = "5000"
-      target_port = "5000"
-    }
-    selector {
-      app = "web"
+    strategy {
+      type = "RollingUpdate"
     }
   }
 }
