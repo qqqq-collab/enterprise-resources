@@ -41,7 +41,7 @@ resource "google_container_node_pool" "web" {
 
   node_config {
     labels {
-      role = "worker"
+      role = "web"
     }
 
     preemptible = true
@@ -108,6 +108,7 @@ resource "google_container_node_pool" "minio" {
   }
 }
 
+# Grabs the goole client config in order to auth the kubernetes provider below
 data "google_client_config" "current" {}
 
 provider "kubernetes" {

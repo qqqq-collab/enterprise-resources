@@ -3,6 +3,40 @@ resource "google_storage_bucket" "minio" {
   location = "${var.minio_bucket_location}"
 }
 
+resource "random_id" "minio-access-key" {
+  byte_length = "12"
+}
+
+output "minio-access-key" {
+  value = "${random_id.minio-access-key.b64_url}"
+}
+
+resource "kubernetes_secret" "minio-access-key" {
+  metadata {
+    name = "minio-access-key"
+  }
+  data {
+    MINIO_ACCESS_KEY = "${random_id.minio-access-key.b64_url}"
+  }
+}
+
+resource "random_id" "minio-secret-key" {
+  byte_length = "16"
+}
+
+output "minio-secret-key" {
+  value = "${random_id.minio-secret-key.b64_url}"
+}
+
+resource "kubernetes_secret" "minio-secret-key" {
+  metadata {
+    name = "minio-secret-key"
+  }
+  data {
+    MINIO_SECRET_KEY = "${random_id.minio-secret-key.b64_url}"
+  }
+}
+
 resource "kubernetes_deployment" "minio_storage" {
   metadata {
     name = "minio"
@@ -22,7 +56,7 @@ resource "kubernetes_deployment" "minio_storage" {
       }
       spec {
         node_selector {
-          role = "minio"
+          role = "${google_container_node_pool.minio.node_config.0.labels.role}"
         }
         volume {
           name = "minio-service-account"
@@ -45,7 +79,7 @@ resource "kubernetes_deployment" "minio_storage" {
             name = "MINIO_ACCESS_KEY"
             value_from {
               secret_key_ref {
-                name = "minio-access-key"
+                name = "${kubernetes_secret.minio-access-key.metadata.0.name}"
                 key  = "MINIO_ACCESS_KEY"
               }
             }
@@ -54,7 +88,7 @@ resource "kubernetes_deployment" "minio_storage" {
             name = "MINIO_SECRET_KEY"
             value_from {
               secret_key_ref {
-                name = "minio-secret-key"
+                name = "${kubernetes_secret.minio-secret-key.metadata.0.name}"
                 key  = "MINIO_SECRET_KEY"
               }
             }

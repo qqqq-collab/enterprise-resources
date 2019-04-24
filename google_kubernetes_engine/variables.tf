@@ -12,6 +12,11 @@ variable "zone" {
   default = "us-east4a"
 }
 
+variable "codecov_version" {
+  description = "Version of codecov enterprise to deploy"
+  default = "4.4.4"
+}
+
 variable "cluster_name" {
   description = "Google Kubernetes Engine (GKE) cluster name"
   default = "default-codecov-cluster"
@@ -52,10 +57,6 @@ variable "minio_replicas" {
   default = "4"
 }
 
-variable "minio_gcs_creds" {
-  description = "Google cloud credentials for minio"
-}
-
 variable "minio_bucket_name" {
   description = "Name of GCS bucket to create for minio"
 }
@@ -63,14 +64,6 @@ variable "minio_bucket_name" {
 variable "minio_bucket_location" {
   description = "Name of GCS bucket to create for minio"
   default = "US"
-}
-
-variable "minio_access_key" {
-  description = "Access key for minio api"
-}
-
-variable "minio_secret_key" {
-  description = "Secret key for minio api"
 }
 
 variable "redis_instance_name" {

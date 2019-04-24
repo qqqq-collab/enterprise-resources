@@ -3,6 +3,10 @@ resource "google_redis_instance" "codecov" {
 	memory_size_gb = 1
 }
 
+# This is necessary due to google_sql_database instance names being eventually
+# consistent.  For tasks that require recreation of the db resource, using the 
+# same name often fails because it remains reserved until the record of the db
+# instance is fully purged from google's metadata.
 resource "random_pet" "postgres" {
   length = "2"
   separator = "-"
@@ -30,12 +34,8 @@ resource "google_sql_user" "codecov" {
 }
 
 # TODO destroying this resource fails because GCP refuses to destroy user above
-# while it still owns db resources.  For now, if you need to destroy the entire
-# stack, either remove the database instance manually, or remove the tf state for
-# the above user to allow the db instance to be destroyed.
-# ex: 
-# terraform state rm google_sql_user.codecov
-# terraform destroy
+# while it still owns db resources.  For now, we have provided a destroy.sh script
+# that removes the above user from state to allow the db instance to be destroyed.
 resource "google_sql_database" "codecov" {
   name = "codecov"
   instance = "${google_sql_database_instance.codecov.name}"

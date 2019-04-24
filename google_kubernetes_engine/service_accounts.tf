@@ -46,3 +46,44 @@ resource "kubernetes_secret" "minio-service-account" {
   }
 }
 
+# TODO figure out why this role can't be created with the current level of access
+# granted to terraform
+#resource "kubernetes_cluster_role" "traefik_ingress_controller" {
+#  metadata {
+#    name = "traefik-ingress-controller"
+#  }
+#  rule {
+#    verbs      = ["get", "list", "watch"]
+#    api_groups = ["rbac.authorization.k8s.io"]
+#    resources  = ["services", "endpoints", "secrets"]
+#  }
+#  rule {
+#    verbs      = ["get", "list", "watch"]
+#    api_groups = ["extensions"]
+#    resources  = ["ingresses"]
+#  }
+#}
+
+resource "kubernetes_service_account" "traefik_ingress_controller" {
+  metadata {
+    name      = "traefik-ingress-controller"
+    namespace = "default"
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "traefik_ingress_controller" {
+  metadata {
+    name = "traefik-ingress-controller"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = "${kubernetes_service_account.traefik_ingress_controller.metadata.0.name}"
+    namespace = "${kubernetes_service_account.traefik_ingress_controller.metadata.0.namespace}"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    # giving cluster-admin is too much access for traefik.
+    name      = "cluster-admin"
+  }
+}

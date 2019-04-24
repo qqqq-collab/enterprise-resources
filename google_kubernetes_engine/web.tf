@@ -1,3 +1,12 @@
+resource "kubernetes_secret" "codecov-yml" {
+  metadata {
+    name = "codecov-yml"
+  }
+  data {
+    "codecov.yml" = "${file("${var.codecov_yml}")}"
+  }
+}
+
 resource "kubernetes_deployment" "web" {
   metadata {
     name = "web"
@@ -16,6 +25,9 @@ resource "kubernetes_deployment" "web" {
         }
       }
       spec {
+        node_selector {
+          role = "${google_container_node_pool.web.node_config.0.labels.role}"
+        }
         volume {
           name = "codecov-yml"
           secret {
@@ -24,7 +36,7 @@ resource "kubernetes_deployment" "web" {
         }
         container {
           name  = "web"
-          image = "codecov/enterprise:v4.4.4"
+          image = "codecov/enterprise:v${var.codecov_version}"
           args  = ["web"]
           port {
             container_port = 5000
@@ -55,11 +67,21 @@ resource "kubernetes_deployment" "web" {
           }
           env {
             name = "SERVICES__MINIO__ACCESS_KEY_ID"
-            value = "${var.minio_access_key}"
+            value_from {
+              secret_key_ref {
+                name = "${kubernetes_secret.minio-access-key.metadata.0.name}"
+                key  = "MINIO_ACCESS_KEY"
+              }
+            }
           }
           env {
             name = "SERVICES__MINIO__SECRET_ACCESS_KEY"
-            value = "${var.minio_secret_key}"
+            value_from {
+              secret_key_ref {
+                name = "${kubernetes_secret.minio-secret-key.metadata.0.name}"
+                key  = "MINIO_SECRET_KEY"
+              }
+            }
           }
           env {
             name = "SERVICES__MINIO__BUCKET"
@@ -90,6 +112,9 @@ resource "kubernetes_deployment" "web" {
             mount_path = "/config"
           }
         }
+
+        # sidecar container use to allow web containers access to the
+        # postgres database.
         volume {
           name = "postgres-service-account"
           secret {

@@ -2,48 +2,6 @@
 # to the appropriate terraform resource properties to ensure proper dependency 
 # resolution.
 
-# TODO figure out why this role can't be created with the current level of access
-# granted to terraform
-#resource "kubernetes_cluster_role" "traefik_ingress_controller" {
-#  metadata {
-#    name = "traefik-ingress-controller"
-#  }
-#  rule {
-#    verbs      = ["get", "list", "watch"]
-#    api_groups = ["rbac.authorization.k8s.io"]
-#    resources  = ["services", "endpoints", "secrets"]
-#  }
-#  rule {
-#    verbs      = ["get", "list", "watch"]
-#    api_groups = ["extensions"]
-#    resources  = ["ingresses"]
-#  }
-#}
-
-resource "kubernetes_service_account" "traefik_ingress_controller" {
-  metadata {
-    name      = "traefik-ingress-controller"
-    namespace = "default"
-  }
-}
-
-resource "kubernetes_cluster_role_binding" "traefik_ingress_controller" {
-  metadata {
-    name = "traefik-ingress-controller"
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = "${kubernetes_service_account.traefik_ingress_controller.metadata.0.name}"
-    namespace = "${kubernetes_service_account.traefik_ingress_controller.metadata.0.namespace}"
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    # giving cluster-admin is too much access for traefik.
-    name      = "cluster-admin"
-  }
-}
-
 data "template_file" "traefik-toml-http" {
   count = "${1 - var.enable_https}"
   template = <<EOF
@@ -81,6 +39,17 @@ resource "kubernetes_config_map" "traefik-toml" {
   }
 }
 
+resource "kubernetes_secret" "traefik-tls" {
+  metadata {
+    name = "traefik-tls"
+  }
+  type = "tls"
+  data {
+    tls.key = "${file("${var.tls_key}")}"
+    tls.crt = "${file("${var.tls_cert}")}"
+  }
+}
+
 resource "kubernetes_deployment" "traefik" {
   metadata {
     name = "traefik-ingress-controller"
@@ -89,7 +58,6 @@ resource "kubernetes_deployment" "traefik" {
     replicas = "${var.traefik_replicas}"
     selector {
       match_labels {
-        # run on the web node pool
         app = "traefik-ingress-controller" 
       }
     }
@@ -100,6 +68,10 @@ resource "kubernetes_deployment" "traefik" {
         }
       }
       spec {
+        node_selector {
+          # run in the web node pool
+          role = "${google_container_node_pool.web.node_config.0.labels.role}"
+        }
         service_account_name = "${kubernetes_service_account.traefik_ingress_controller.metadata.0.name}"
         volume {
           name = "config"
@@ -235,6 +207,10 @@ EOF
 
 # work around kubernetes provider's lack of a kubernetes_ingress resource
 resource "null_resource" "traefik-ingress" {
+  provisioner "local-exec" "configure-kubectl" {
+    command = "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --zone=${google_container_cluster.primary.location}"
+  }
+
   provisioner "local-exec" "traefik-ingress" {
     command = "cat <<EOF | kubectl create -f - \n${data.template_file.traefik-ingress.rendered}\nEOF"
   }
@@ -245,4 +221,8 @@ resource "null_resource" "traefik-ingress" {
   }
 
   depends_on = ["kubernetes_service.traefik"]
+}
+
+output "ingress-ip" {
+  value = "${kubernetes_service.traefik.load_balancer_ingress.0.ip}"
 }
