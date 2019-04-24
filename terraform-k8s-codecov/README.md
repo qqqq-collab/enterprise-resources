@@ -13,7 +13,8 @@ kubernetes cluster.
 
 - A postgresql v10 server configured to allow connections from your k8s cluster. 
 - A redis server configured to allow connections from your k8s cluster.
-- An NFS server configured to allow connections from your k8s cluster.
+- An NFS server configured to allow connections from your k8s cluster.  This
+  will be used to store coverage reports.
 
 ## Module Parameters
 
