@@ -24,7 +24,7 @@ account.
   account](https://cloud.google.com/iam/docs/creating-managing-service-accounts) for your project.
 - Save the service account json.
 - [Grant the project
-  owner](https://cloud.google.com/iam/docs/granting-roles-to-service-accounts#granting_access_to_a_service_account_for_a_resource) role to your service account. TODO maybe `roles/editor` is all that's necessary?
+  owner](https://cloud.google.com/iam/docs/granting-roles-to-service-accounts#granting_access_to_a_service_account_for_a_resource) role to your service account. TODO maybe `roles/editor` is all that's necessary? (Eli: I would confirm the minimum number of roles needed, here. Many enterprise companies definitely want to apply the principle of least privelege and are very interested in minimizing needed permissions)
 - Define `GOOGLE_CLOUD_KEYFILE_JSON=/path/to/service-account.json` to allow the 
   Google cloud terraform provider access to your project.
     ```
@@ -95,11 +95,11 @@ terraform and create the stack following these steps:
      ```
    The ingress IP and minio API keys are output at the end of the run.
    Point the ingress hostname (specified in `ingress_host` above)
-   at this IP to access Codecov enterprise.
+   at this IP to access Codecov enterprise. (Eli: I would be a bit more specific about what ''point the ingress hostname means''. I assume this means ''setup a DNS CNAME record pointing codecov.myenterprise.com to the `ingress-ip`, but whatever it is, I think it's good to be pretty specific)
 
    If you wish to use a tool to access your reports through minio, you can
    use the key pair above to access it using an s3-compatible tool like the [minio
-   client](https://docs.min.io/docs/minio-client-quickstart-guide).
+   client](https://docs.min.io/docs/minio-client-quickstart-guide). (Eli: I think users could also expose the minio deployment via ingress and have a browser accessible view of what's stored in minio. It might not be worth detailing this, but we could link to the minio docs about the web interface? Thoughts?)
 
 ## Destroying
 
