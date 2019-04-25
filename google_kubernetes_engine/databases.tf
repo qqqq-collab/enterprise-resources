@@ -1,6 +1,6 @@
 resource "google_redis_instance" "codecov" {
-	name = "${var.redis_instance_name}"
-	memory_size_gb = 1
+  name = "${var.redis_instance_name}"
+  memory_size_gb = 1
 }
 
 # This is necessary due to google_sql_database instance names being eventually
