@@ -25,10 +25,9 @@ resource "kubernetes_deployment" "web" {
         }
       }
       spec {
-# TODO figure out node selection on aws
-#        node_selector {
-#          role = "${google_container_node_pool.web.node_config.0.labels.role}"
-#        }
+        node_selector {
+          "kubernetes.io/role" = "web"
+        }
         volume {
           name = "codecov-yml"
           secret {

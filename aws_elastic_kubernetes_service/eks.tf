@@ -1,17 +1,25 @@
 locals {
   worker_groups = [
     {
+      name = "web"
       instance_type = "t2.medium"
       subnets = "${join(",", module.vpc.private_subnets)}"
-      asg_desired_capacity = 3
+      asg_desired_capacity = 2
+      kubelet_extra_args = "--node-labels=kubernetes.io/role=web"
     },
-  ]
-  worker_groups_launch_template = [
     {
-      instance_type = "t2.small"
+      name = "worker"
+      instance_type = "t2.medium"
       subnets = "${join(",", module.vpc.private_subnets)}"
-      asg_desired_capacity = "3"
-      additional_security_group_ids = "${aws_security_group.worker_mgmt.id}"
+      asg_desired_capacity = 2
+      kubelet_extra_args = "--node-labels=kubernetes.io/role=worker"
+    },
+    {
+      name = "minio"
+      instance_type = "t2.medium"
+      subnets = "${join(",", module.vpc.private_subnets)}"
+      asg_desired_capacity = 2
+      kubelet_extra_args = "--node-labels=kubernetes.io/role=minio"
     },
   ]
 }
@@ -37,9 +45,7 @@ module "eks" {
   subnets = ["${module.vpc.private_subnets}"]
   vpc_id = "${module.vpc.vpc_id}"
   worker_groups = "${local.worker_groups}"
-  worker_groups_launch_template = "${local.worker_groups_launch_template}"
-  worker_group_count = "1"
-  worker_group_launch_template_count = "1"
+  worker_group_count = "3"
   worker_additional_security_group_ids = ["${aws_security_group.worker_mgmt.id}"]
   cluster_enabled_log_types = ["api","controllerManager","scheduler"]
   workers_additional_policies = ["${aws_iam_policy.worker-s3.id}"]

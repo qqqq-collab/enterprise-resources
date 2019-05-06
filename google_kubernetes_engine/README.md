@@ -31,6 +31,8 @@ account.
     # ~/.bashrc
     export GOOGLE_CLOUD_KEYFILE_JSON=/path/to/service-account.json
     ```
+- You will need a DNS hostname to assign to the load balancer IP address (ex:
+  `codecov.yourdomain.com`).
 
 ## Codecov configuration
 
@@ -62,7 +64,7 @@ defined in a `terraform.tfvars` file.  More info on
 | `redis_instance_name` | Name used for redis instance | required |
 | `postgres_instance_name` | Name used for postgres instance | required |
 | `codecov_yml` | Path to your codecov.yml | required |
-| `ingress_host` | Hostname used for http(s) ingress | |
+| `ingress_host` | Hostname used for http(s) ingress. (ex: `codecov.yourdomain.com`) | |
 | `enable_https` | Enables https ingress.  Requires TLS cert and key | 0 |
 | `tls_key` | Path to private key to use for TLS | required if enable_https=1 |
 | `tls_cert` | Path to certificate to use for TLS | required if enable_https=1  |
@@ -93,12 +95,11 @@ terraform and create the stack following these steps:
      minio-access-key = xxxxxxxxxxx
      minio-secret-key = xxxxxxxxxxxxxxx
      ```
-   The ingress IP and minio API keys are output at the end of the run.
-   Point the ingress hostname (specified in `ingress_host` above)
-   at this IP to access Codecov enterprise.
-
-   If you wish to use a tool to access your reports through minio, you can
-   use the key pair above to access it using an s3-compatible tool like the [minio
+1. The ingress IP and minio API keys are output at the end of the run.
+   Create a DNS A record for the `ingress_host` above pointing at the
+   resulting `ingress-ip`.  If you wish to use a tool to access your 
+   reports through minio, you can use the key pair above to access it 
+   using an s3-compatible tool like the [minio
    client](https://docs.min.io/docs/minio-client-quickstart-guide).
 
 ## Destroying

@@ -92,10 +92,10 @@ resource "kubernetes_deployment" "traefik" {
         }
       }
       spec {
-#        node_selector {
-#          # run in the web node pool
-#          role = "${google_container_node_pool.web.node_config.0.labels.role}"
-#        }
+        node_selector {
+          # run in the web node pool
+          "kubernetes.io/role" = "web"
+        }
         service_account_name = "${kubernetes_service_account.traefik_ingress_controller.metadata.0.name}"
         volume {
           name = "config"
@@ -242,6 +242,24 @@ resource "null_resource" "traefik-ingress" {
 
   depends_on = ["kubernetes_service.traefik"]
 }
+
+locals {
+  lb_name_split = "${split("-",kubernetes_service.traefik.load_balancer_ingress.0.hostname)}"
+}
+
+# The workaround above creates a dangling ELB for ingress. Since terraform
+# is not aware of it it's not removed on destroy and will prevent a full
+# destroy from executing properly.  This uses the aws cli to delete the ELB
+# first.
+resource "null_resource" "ingress-elb" {
+  provisioner "local-exec" "traefik-ingress" {
+    when = "destroy"
+    command = "aws elb delete-load-balancer --load-balancer-name ${local.lb_name_split[0]}"
+  }
+
+  depends_on = ["null_resource.traefik-ingress"]
+}
+
 
 output "ingress-lb-hostname" {
   value = "${kubernetes_service.traefik.load_balancer_ingress.0.hostname}"

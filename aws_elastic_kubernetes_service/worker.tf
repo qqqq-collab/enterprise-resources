@@ -17,9 +17,9 @@ resource "kubernetes_deployment" "worker" {
         }
       }
       spec {
-#        node_selector {
-#          role = "${google_container_node_pool.worker.node_config.0.labels.role}"
-#        }
+        node_selector {
+          "kubernetes.io/role" = "worker"
+        }
         volume {
           name = "codecov-yml"
           secret {

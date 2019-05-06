@@ -8,10 +8,14 @@ resource "aws_iam_policy" "worker-s3" {
   "Statement": [
     {
       "Action": [
-        "s3:*"
+        "s3:putObject",
+        "s3:getObject",
+        "s3:deleteObject",
+        "s3:listBucket",
+        "s3:ListAllMyBuckets"
       ],
       "Effect": "Allow",
-      "Resource": "*"
+      "Resource": "arn:aws:s3:::*"
     }
   ]
 }
@@ -80,10 +84,9 @@ resource "kubernetes_deployment" "minio_storage" {
         }
       }
       spec {
-# TODO figure out node selection on EKS
-#        node_selector {
-#          role = "${google_container_node_pool.minio.node_config.0.labels.role}"
-#        }
+        node_selector {
+          "kubernetes.io/role" = "minio"
+        }
         container {
           name  = "minio"
           image = "minio/minio:RELEASE.2019-04-09T01-22-30Z"
