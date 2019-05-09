@@ -1,6 +1,3 @@
-# TODO replace hard-coded references between resources with interpolated references
-# to the appropirate terraform resource properties
-
 resource "kubernetes_cluster_role" "traefik_ingress_controller" {
   metadata {
     name = "traefik-ingress-controller"

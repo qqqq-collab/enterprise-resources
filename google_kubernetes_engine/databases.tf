@@ -33,7 +33,7 @@ resource "google_sql_user" "codecov" {
   password = "${random_string.postgres-password.result}"
 }
 
-# TODO destroying this resource fails because GCP refuses to destroy user above
+# Destroying this resource fails because GCP refuses to destroy user above
 # while it still owns db resources.  For now, we have provided a destroy.sh script
 # that removes the above user from state to allow the db instance to be destroyed.
 resource "google_sql_database" "codecov" {

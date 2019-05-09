@@ -1,7 +1,3 @@
-# TODO replace hard-coded references between resources with interpolated references
-# to the appropriate terraform resource properties to ensure proper dependency 
-# resolution.
-
 data "template_file" "traefik-toml-http" {
   count = "${1 - var.enable_https}"
   template = <<EOF

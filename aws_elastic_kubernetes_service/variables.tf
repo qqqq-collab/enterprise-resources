@@ -33,6 +33,36 @@ variable "redis_num_nodes" {
   default = "1"
 }
 
+variable "web_nodes" {
+  description = "Number of web nodes to create"
+  default = "2"
+}
+
+variable "web_node_type" {
+  description = "Instance type to use for web nodes"
+  default = "t2.medium"
+}
+
+variable "worker_nodes" {
+  description = "Number of worker nodes to create"
+  default = "2"
+}
+
+variable "worker_node_type" {
+  description = "Instance type to use for worker nodes"
+  default = "t2.medium"
+}
+
+variable "minio_nodes" {
+  description = "Number of minio nodes to create"
+  default = "2"
+}
+
+variable "minio_node_type" {
+  description = "Instance type to use for minio nodes"
+  default = "t2.medium"
+}
+
 variable "web_replicas" {
   description = "Number of web replicas to execute"
   default = "2"

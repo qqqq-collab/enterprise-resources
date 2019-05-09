@@ -1,4 +1,9 @@
+# Example VPC
+# This creates a VPC for the Codecov Enterprise deployment and associated
+# resources.
+
 data "aws_availability_zones" "list" {}
+
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
   name = "codecov-vpc"

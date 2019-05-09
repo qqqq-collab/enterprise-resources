@@ -1,7 +1,3 @@
-# TODO replace hard-coded references between resources with interpolated references
-# to the appropriate terraform resource properties to ensure proper dependency 
-# resolution.
-
 resource "kubernetes_service_account" "traefik_ingress_controller" {
   metadata {
     name      = "traefik-ingress-controller"
@@ -132,10 +128,6 @@ resource "kubernetes_deployment" "traefik" {
             name = "https"
             container_port = "443"
           }
-          port {
-            name = "admin"
-            container_port = "8080"
-          }
           env {
             name = "KUBERNETES_SERVICE_HOST"
             value = "kubernetes"
@@ -188,12 +180,6 @@ resource "kubernetes_service" "traefik" {
       port        = "443"
       target_port = "443"
     }
-    port {
-      name = "admin"
-      protocol    = "TCP"
-      port        = "8080"
-      target_port = "8080"
-    }
     selector {
       app = "traefik-ingress-controller"
     }
@@ -237,7 +223,7 @@ resource "null_resource" "traefik-ingress" {
 
   provisioner "local-exec" "traefik-ingress" {
     when = "destroy"
-    command = "kubectl delete ingress traefik-ingress"
+    command = "kubectl delete ingress traefik-ingress || true"
   }
 
   depends_on = ["kubernetes_service.traefik"]
@@ -254,12 +240,11 @@ locals {
 resource "null_resource" "ingress-elb" {
   provisioner "local-exec" "traefik-ingress" {
     when = "destroy"
-    command = "aws elb delete-load-balancer --load-balancer-name ${local.lb_name_split[0]}"
+    command = "${path.module}/destroy_ingress_elb.sh ${local.lb_name_split[0]}"
   }
 
   depends_on = ["null_resource.traefik-ingress"]
 }
-
 
 output "ingress-lb-hostname" {
   value = "${kubernetes_service.traefik.load_balancer_ingress.0.hostname}"

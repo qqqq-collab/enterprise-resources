@@ -63,6 +63,12 @@ defined in a `terraform.tfvars` file.  More info on
 | `postgres_skip_final_snapshot` | Whether to skip taking a final snapshot when destroying the Postgres DB | 0 |
 | `redis_node_type` | Node type to use for redis cluster nodes | cache.t2.micro |
 | `redis_num_nodes` | Number of nodes to run in the redis cluster | 1 |
+| `web_nodes` | Number of web nodes to create | 2 |
+| `web_node_type` | Instance type to use for web nodes | t2.medium |
+| `worker_nodes` | Number of worker nodes to create | 2 |
+| `worker_node_type` | Instance type to use for worker nodes | t2.medium |
+| `minio_nodes` | Number of minio nodes to create | 4 |
+| `minio_node_type` | Instance type to use for minio nodes | t2.medium |
 | `web_replicas` | Number of web replicas to execute | 2 |
 | `worker_replicas` | Number of worker replicas to execute | 2 |
 | `minio_replicas` | Number of minio replicas to execute | 4 |
@@ -87,6 +93,11 @@ terraform and create the stack following these steps:
 1. If you're satisfied with the execution plan, apply it.  `terraform apply
    plan.out`.  This will begin creating your stack.  [Terraform
    apply](https://www.terraform.io/docs/commands/apply.html)
+1. Due to limitations of the current version of Terraform, the `apply` will
+   likely encounter an error when attempting to create kubernetes resources.
+   This is due to a race condition between the EKS module and the kubernetes
+   provider.  Repeating the `plan`, then `apply` procedure above will complete
+   creation of the kubernetes resources.
 1. Wait... this will take a little while.  If everything goes well, you will
    see something like this:
      ```
@@ -99,7 +110,7 @@ terraform and create the stack following these steps:
      minio-access-key = xxxxxxxxxxx
      minio-secret-key = xxxxxxxxxxxxxxx
      ```
-1. The ingress IP and minio API keys are output at the end of the run.
+1. The ingress hostname and minio API keys are output at the end of the run.
    Create a DNS CNAME record for the `ingress_host` above pointing at the
    resulting `ingress-lb-hostname`.  If you wish to use a tool to access your
    reports through minio, you can use the key pair above to access it

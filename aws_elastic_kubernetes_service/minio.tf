@@ -1,4 +1,3 @@
-# TODO limit permissions to what is needed for minio
 resource "aws_iam_policy" "worker-s3" {
   name = "codecov-eks-worker-s3"
 
