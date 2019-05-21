@@ -1,6 +1,7 @@
 resource "google_storage_bucket" "minio" {
   name = "${var.minio_bucket_name}"
   location = "${var.minio_bucket_location}"
+  force_destroy = "${var.minio_bucket_force_destroy}"
 }
 
 resource "random_id" "minio-access-key" {

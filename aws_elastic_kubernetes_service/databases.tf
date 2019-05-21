@@ -45,6 +45,14 @@ resource "aws_db_instance" "postgres" {
   final_snapshot_identifier = "codecov-postgres-${random_string.identifier-suffix.result}-final"
 }
 
+output "postgres-username" {
+  value = "${aws_db_instance.postgres.username}"
+}
+
+output "postgres-password" {
+  value = "${random_string.postgres-password.result}"
+}
+
 resource "aws_elasticache_subnet_group" "redis" {
   name = "codecov-redis"
   subnet_ids = ["${module.vpc.private_subnets}"]

@@ -66,12 +66,27 @@ variable "minio_bucket_location" {
   default = "US"
 }
 
+variable "minio_bucket_force_destroy" {
+  description = "Force is required to destroy the cloud sql bucket when it contains data"
+  default = "false"
+}
+
 variable "redis_instance_name" {
   description = "Name used for redis instance"
 }
 
+variable "redis_memory_size" {
+  description = "Memory size in GB for redis instance"
+  default = "5"
+}
+
 variable "postgres_instance_name" {
   description = "Name used for postgres instance"
+}
+
+variable "postgres_instance_type" {
+  description = "Instance type used for postgres instance"
+  default = "db-f1-micro"
 }
 
 variable "codecov_yml" {

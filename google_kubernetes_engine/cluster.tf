@@ -12,9 +12,16 @@ provider "google" {
 # because some node pool changes will force recreation of the cluster.
 # See the terraform docs for more info:
 # https://www.terraform.io/docs/providers/google/r/container_cluster.html
+
+data "google_container_engine_versions" "gke" { 
+  location = "${var.region}"
+}
+
 resource "google_container_cluster" "primary" {
   name     = "${var.cluster_name}"
   location = "${var.region}"
+
+  min_master_version = "${data.google_container_engine_versions.gke.latest_master_version}"
 
   ip_allocation_policy {
     use_ip_aliases = "true"
@@ -30,6 +37,12 @@ resource "google_container_cluster" "primary" {
   master_auth {
     username = ""
     password = ""
+  }
+
+  maintenance_policy {
+    daily_maintenance_window {
+      start_time = "01:00"
+    }
   }
 }
 

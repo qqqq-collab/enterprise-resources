@@ -20,11 +20,15 @@ account.
 
 - Create a new [Google cloud
   project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
+  We recommend creating a new, dedicated project for Codecov Enterprise in
+  order to isolate it from your other production environments.  This will
+  ensure that the service account you create in the next step has only the
+  permissions necessary to modify the Codecov project.
 - Create a [service
   account](https://cloud.google.com/iam/docs/creating-managing-service-accounts) for your project.
 - Save the service account json.
 - [Grant the project
-  owner](https://cloud.google.com/iam/docs/granting-roles-to-service-accounts#granting_access_to_a_service_account_for_a_resource) role to your service account. TODO maybe `roles/editor` is all that's necessary?
+  owner](https://cloud.google.com/iam/docs/granting-roles-to-service-accounts#granting_access_to_a_service_account_for_a_resource) role to your service account.
 - Define `GOOGLE_CLOUD_KEYFILE_JSON=/path/to/service-account.json` to allow the 
   Google cloud terraform provider access to your project.
     ```
@@ -38,7 +42,8 @@ account.
 
 Configuration of Codecov enterprise is handled through a YAML config file.
 See [configuring codecov.yml](https://docs.codecov.io/docs/configuration) for 
-more info.
+more info.  Refer to this example [codecov.yml](../codecov.yml.example) for the
+minimum necessary configuration.
 
 The terraform stack is configured using terraform variables which can be
 defined in a `terraform.tfvars` file.  More info on
@@ -49,7 +54,7 @@ defined in a `terraform.tfvars` file.  More info on
 | `gcloud_project` | Google cloud project name | required |
 | `region` | Google cloud region | us-east4 |
 | `zone` | Default Google cloud zone for zone-specific services | us-east4a |
-| `codecov_version` | Version of codecov enterprise to deploy | 4.4.4 |
+| `codecov_version` | Version of codecov enterprise to deploy | 4.4.5 |
 | `cluster_name` | Google Kubernetes Engine (GKE) cluster name | default-codecov-cluster |
 | `web_node_pool_count` | Number of nodes to create in the web node pool | 1 |
 | `worker_node_pool_count` | Number of nodes to create in the worker node pool | 1 |
@@ -61,8 +66,11 @@ defined in a `terraform.tfvars` file.  More info on
 | `traefik_replicas` | Number of traefik replicas to deploy | 2 |
 | `minio_bucket_name` | Name of GCS bucket to create for minio | required |
 | `minio_bucket_location` | Name of GCS bucket to create for minio | US |
+| `minio_bucket_force_destroy` | Required to allow destroying a non-empty bucket | false |
 | `redis_instance_name` | Name used for redis instance | required |
+| `redis_memory_size` | Amount of memory in GB to allocate for redis instance | 5 |
 | `postgres_instance_name` | Name used for postgres instance | required |
+| `postgres_instance_type` | Instance type used for postgres | db-f1-micro |
 | `codecov_yml` | Path to your codecov.yml | required |
 | `ingress_host` | Hostname used for http(s) ingress. (ex: `codecov.yourdomain.com`) | |
 | `enable_https` | Enables https ingress.  Requires TLS cert and key | 0 |
@@ -101,13 +109,17 @@ terraform and create the stack following these steps:
    reports through minio, you can use the key pair above to access it 
    using an s3-compatible tool like the [minio
    client](https://docs.min.io/docs/minio-client-quickstart-guide).
+1. To show the outputs again: `terraform output`
+1. Google executes an upgrade on the cluster control plane after creation,
+   so some operations (such as `plan` or `apply`) will be unable to 
+   execute until this upgrade completes.
 
 ## Destroying
 
-If you want to remove your Codecov enterprise stack, a `destroy.sh` script is
+If you want to remove your Codecov Enterprise stack, a `destroy.sh` script is
 provided.  *This will remove all of your enterprise configuration and uploaded
 coverage reports.*  All resources created with terraform will be removed, so
-use with caution
+please use with caution.
 
 ## Best practices for Terraform and Codecov
 

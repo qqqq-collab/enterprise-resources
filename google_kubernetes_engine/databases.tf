@@ -1,6 +1,6 @@
 resource "google_redis_instance" "codecov" {
   name = "${var.redis_instance_name}"
-  memory_size_gb = 1
+  memory_size_gb = "${var.redis_memory_size}"
 }
 
 # This is necessary due to google_sql_database instance names being eventually
@@ -18,7 +18,7 @@ resource "google_sql_database_instance" "codecov" {
   region = "${var.region}"
 
   settings {
-    tier = "db-f1-micro"
+    tier = "${var.postgres_instance_type}"
   }
 }
 
@@ -32,6 +32,15 @@ resource "google_sql_user" "codecov" {
   name = "codecov"
   password = "${random_string.postgres-password.result}"
 }
+
+output "postgres-username" {
+  value = "${google_sql_user.codecov.name}"
+}
+
+output "postgres-password" {
+  value = "${random_string.postgres-password.result}"
+}
+
 
 # Destroying this resource fails because GCP refuses to destroy user above
 # while it still owns db resources.  For now, we have provided a destroy.sh script

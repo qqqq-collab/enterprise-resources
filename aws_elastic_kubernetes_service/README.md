@@ -48,7 +48,8 @@ for a fully robust deployment.
 
 Configuration of Codecov enterprise is handled through a YAML config file.
 See [configuring codecov.yml](https://docs.codecov.io/docs/configuration) for 
-more info.
+more info.  Refer to this example [codecov.yml](../codecov.yml.example) for the
+minimum necessary configuration.
 
 The terraform stack is configured using terraform variables which can be
 defined in a `terraform.tfvars` file.  More info on
@@ -57,7 +58,7 @@ defined in a `terraform.tfvars` file.  More info on
 | name | description | default |
 | --- | --- | --- |
 | `region` | AWS region | us-east-1 |
-| `codecov_version` | Version of codecov enterprise to deploy | 4.4.4 |
+| `codecov_version` | Version of codecov enterprise to deploy | 4.4.5 |
 | `cluster_name` | Google Kubernetes Engine (GKE) cluster name | default-codecov-cluster |
 | `postgres_instance_class` | Instance class for PostgreSQL RDS instance | db.t3.micro |
 | `postgres_skip_final_snapshot` | Whether to skip taking a final snapshot when destroying the Postgres DB | 0 |
@@ -73,7 +74,7 @@ defined in a `terraform.tfvars` file.  More info on
 | `worker_replicas` | Number of worker replicas to execute | 2 |
 | `minio_replicas` | Number of minio replicas to execute | 4 |
 | `codecov_yml` | Path to your codecov.yml | codecov.yml |
-| `ingress_host` | Hostname used for http(s) ingress | }
+| `ingress_host` | Hostname used for http(s) ingress | |
 | `traefik_replicas` | Number of traefik replicas to deploy | 2 |
 | `enable_https` | Enables https ingress.  Requires TLS cert and key | 0 |
 | `tls_key` | Path to private key to use for TLS | required if enable_https=1 |
@@ -119,12 +120,12 @@ terraform and create the stack following these steps:
 
 ## Destroying
 
-If you want to remove your Codecov enterprise stack, a `destroy.sh` script is
-provided.  *This will remove all of your enterprise configuration and uploaded
+If you want to remove your Codecov Enterprise stack, execute `terraform
+destroy`.  *This will remove all of your enterprise configuration and uploaded
 coverage reports.*  All resources created with terraform will be removed, so
-use with caution
+please use with caution.
 
-## Best practices for Terraform and Codecov]
+## Best practices for Terraform and Codecov
 
 This is intended to be an example terraform stack.  As such, it ignores some
 terraform best practices such as remote state storage and locking.  For more

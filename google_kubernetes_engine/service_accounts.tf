@@ -46,24 +46,6 @@ resource "kubernetes_secret" "minio-service-account" {
   }
 }
 
-# TODO figure out why this role can't be created with the current level of access
-# granted to terraform
-#resource "kubernetes_cluster_role" "traefik_ingress_controller" {
-#  metadata {
-#    name = "traefik-ingress-controller"
-#  }
-#  rule {
-#    verbs      = ["get", "list", "watch"]
-#    api_groups = ["rbac.authorization.k8s.io"]
-#    resources  = ["services", "endpoints", "secrets"]
-#  }
-#  rule {
-#    verbs      = ["get", "list", "watch"]
-#    api_groups = ["extensions"]
-#    resources  = ["ingresses"]
-#  }
-#}
-
 resource "kubernetes_service_account" "traefik_ingress_controller" {
   metadata {
     name      = "traefik-ingress-controller"
