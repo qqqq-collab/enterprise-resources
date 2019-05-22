@@ -74,7 +74,7 @@ resource "aws_security_group" "elasticache" {
 }
 
 resource "aws_elasticache_cluster" "redis" {
-  cluster_id = "codecov-postgres-${random_string.identifier-suffix.result}"
+  cluster_id = "codecov-redis-${random_string.identifier-suffix.result}"
   engine = "redis"
   node_type = "${var.redis_node_type}"
   num_cache_nodes = "${var.redis_num_nodes}"
