@@ -61,7 +61,7 @@ defined in a `terraform.tfvars` file.  More info on
 | `codecov_version` | Version of codecov enterprise to deploy | 4.4.5 |
 | `cluster_name` | Google Kubernetes Engine (GKE) cluster name | default-codecov-cluster |
 | `postgres_instance_class` | Instance class for PostgreSQL RDS instance | db.t3.micro |
-| `postgres_skip_final_snapshot` | Whether to skip taking a final snapshot when destroying the Postgres DB | 0 |
+| `postgres_skip_final_snapshot` | Whether to skip taking a final snapshot when destroying the Postgres DB. It is recommended to keep this set to 0 in production in order to avoid unintended data loss. | 0 |
 | `redis_node_type` | Node type to use for redis cluster nodes | cache.t2.micro |
 | `redis_num_nodes` | Number of nodes to run in the redis cluster | 1 |
 | `web_nodes` | Number of web nodes to create | 2 |

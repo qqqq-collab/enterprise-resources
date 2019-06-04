@@ -22,6 +22,14 @@ resource "aws_iam_policy" "worker-s3" {
       ],
       "Effect": "Allow",
       "Resource": "arn:aws:s3:::${aws_s3_bucket.minio.id}"
+    },
+    {
+      "Sid": "allowListAllMyBuckets",
+      "Action": [
+        "s3:ListAllMyBuckets"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::*"
     }
   ]
 }
