@@ -6,15 +6,22 @@ resource "aws_iam_policy" "worker-s3" {
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "allowObjectActions",
       "Action": [
         "s3:putObject",
         "s3:getObject",
-        "s3:deleteObject",
-        "s3:listBucket",
-        "s3:ListAllMyBuckets"
+        "s3:deleteObject"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:s3:::*"
+      "Resource": "arn:aws:s3:::${aws_s3_bucket.minio.id}/*"
+    },
+    {
+      "Sid": "allowListBucket",
+      "Action": [
+        "s3:listBucket"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::${aws_s3_bucket.minio.id}"
     }
   ]
 }
