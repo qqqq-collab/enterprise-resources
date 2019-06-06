@@ -15,7 +15,7 @@ variable "vpc_private_subnet_ids" {
 
 variable "codecov_version" {
   description = "Version of codecov enterprise to deploy"
-  default = "4.4.5"
+  default = "4.4.6"
 }
 
 variable "cluster_name" {
