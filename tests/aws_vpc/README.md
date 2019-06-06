@@ -74,7 +74,7 @@ terraform and create the stack following these steps:
     postgres-password = xxxxxxxxxxxx
     postgres-username = codecov
     postgres_url = postgres://codecov:xxxxxxxxxxxx@codecov-postgres-xxx.xxxxxxxxxx.us-east-1.rds.amazonaws.com:5432/codecov
-    s3_bucket = codecov-minio-epic-worm
+    s3_bucket = codecov-minio-xxxx-xxxx
     vpc_id = vpc-xxxxxxxxxxxxxxxxx
     vpc_private_subnet_ids = [
         subnet-xxxxxxxxxxxxxxxxx,
