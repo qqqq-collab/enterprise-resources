@@ -2,9 +2,10 @@
 
 This is an example AWS stack that provides the minimum requirements for the
 [AWS EKS
-Migration](https://github.com/codecov/enterprise-resources/tree/master/aws_eks_migration) stack to operate.  It is intended to be used to test
+Migration](https://github.com/codecov/enterprise-resources/tree/master/aws_eks_migration) 
+stack to operate.  It is intended to be used to test
 the migration stack operates correctly, but it can also be used to inform you
-on what the migration stack is expecting.
+on what minimum required resource the migration stack expects.
 It consists of:
 - A VPC
 - Public and private subnets spanning for each of 3 availability zones.
