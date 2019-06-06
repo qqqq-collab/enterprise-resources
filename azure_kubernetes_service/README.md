@@ -1,4 +1,4 @@
-# Elastic Kubernetes Service Example
+# Azure Kubernetes Service Example
 
 This is an example Codecov stack deployed to Azure Kubernetes Service via
 terraform.  It consists of:
@@ -57,7 +57,7 @@ defined in a `terraform.tfvars` file.  More info on
 
 | name | description | default |
 | --- | --- | --- |
-| `region` | AWS region | us-east-1 |
+| `location` | Azure location | eastus |
 | `azurerm_client_id` | `appId` from the SP creation output | |
 | `azurerm_client_secret` | `password` from the SP creation output | |
 | `codecov_version` | Version of codecov enterprise to deploy | 4.4.5 |
