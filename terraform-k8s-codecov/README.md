@@ -1,7 +1,11 @@
+**Note: This module is provided purely as an example, and not an official Codecov Enterprise Deployment Strategy. If you want to use this configuration to test codecov enterprise on your own, internally maintained, cluster, that is fine. Codecov, however, will not support its use in production environments. Nor will we provide support for this module's installation or continued use.**
+
 # Codecov terraform module for kubernetes
 
 This module provides an example of how to set up Codecov Enterprise in a 
 kubernetes cluster.
+
+It is *highly* recommended to deploy Codecov Enterprise into a managed k8s cluster on one of the major cloud providers: AWS, GCP, Azure. Those terraform configurations are supported and provided elsewhere in this repository. Codecov will fully support these configurations if problems arise as a result of their use.
 
 ## Prerequisites
 
