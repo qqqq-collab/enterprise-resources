@@ -34,14 +34,6 @@ resource "kubernetes_deployment" "worker" {
               }
             }
           }
-          env {
-            name = "MINIO_PORT_9000_TCP_ADDR"
-            value = "minio"
-          }
-          env {
-            name = "MINIO_PORT_9000_TCP_PORT"
-            value = "9000"
-          }
           resources {
             limits {
               cpu    = "512m"

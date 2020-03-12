@@ -24,7 +24,7 @@ resource "kubernetes_deployment" "minio_storage" {
         }
         container {
           name  = "minio"
-          image = "minio/minio:RELEASE.2019-04-09T01-22-30Z"
+          image = "minio/minio:RELEASE.2019-10-02T21-19-38Z"
           args  = ["gateway", "nas", "/storage"]
           port {
             container_port = 9000

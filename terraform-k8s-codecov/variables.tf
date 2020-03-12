@@ -66,3 +66,18 @@ variable "minio_secret_key" {
   description = "Secret key for minio"
   default = ""
 }
+
+variable "minio_client_uploads" {
+  description = "Determines if uploads will used presigned PUTs (false) or direct upload (true)"
+  default = "true"
+}
+
+variable "minio_host" {
+  description = "Host URL for minio server"
+  default = "minio"
+}
+
+variable "minio_port" {
+  description = "Host port for minio server"
+  default = "9000"
+}

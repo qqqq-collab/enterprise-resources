@@ -24,7 +24,7 @@ resource "kubernetes_deployment" "web" {
         }
         container {
           name  = "web"
-          image = "codecov/enterprise:v4.4.4"
+          image = "codecov/enterprise:v4.4.11"
           args  = ["web"]
           port {
             container_port = 5000
@@ -36,14 +36,6 @@ resource "kubernetes_deployment" "web" {
                 field_path = "status.hostIP"
               }
             }
-          }
-          env {
-            name = "MINIO_PORT_9000_TCP_ADDR"
-            value = "minio"
-          }
-          env {
-            name = "MINIO_PORT_9000_TCP_PORT"
-            value = "9000"
           }
           resources {
             limits {
