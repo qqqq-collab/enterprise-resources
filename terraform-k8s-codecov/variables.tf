@@ -68,7 +68,7 @@ variable "minio_secret_key" {
 }
 
 variable "minio_client_uploads" {
-  description = "Determines if uploads will used presigned PUTs (false) or direct upload (true)"
+  description = "Determines if uploads will use presigned PUTs (false) or direct upload (true)"
   default = "true"
 }
 
