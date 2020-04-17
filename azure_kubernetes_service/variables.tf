@@ -1,6 +1,6 @@
 variable "location" {
   description = "The Azure Region in which all resources in this example should be provisioned"
-  default = "eastus"
+  default     = "eastus"
 }
 
 variable "azurerm_client_id" {
@@ -13,66 +13,85 @@ variable "azurerm_client_secret" {
 
 variable "codecov_version" {
   description = "Version of codecov enterprise to deploy"
-  default = "4.4.7"
+  default     = "4.4.12"
 }
 
 variable "cluster_name" {
-  description = "Google Kubernetes Engine (GKE) cluster name"
-  default = "default-codecov-cluster"
+  description = "Azure Kubernetes Service (AKS) cluster name"
+  default     = "codecov-enterprise"
 }
 
 variable "node_pool_count" {
   description = "The number of nodes to execute in the kubernetes node pool"
-  default = "5"
+  default     = "5"
 }
 
 variable "node_pool_vm_size" {
   description = "The vm size to use for the node pool instances"
-  default = "Standard_B2s"
+  default     = "Standard_B2s"
 }
 
 variable "postgres_sku" {
   description = "PostgreSQL DB SKU"
-  default = {
-    name = "GP_Gen5_2"
-    capacity = "2"
-    tier = "GeneralPurpose"
-    family = "Gen5"
-  }
+  default     = "GP_Gen5_2"
 }
 
 variable "postgres_storage_profile" {
   description = "Storage profile for PostgreSQL DB"
   default = {
-    storage_mb = "5120"
+    storage_mb            = "5120"
     backup_retention_days = "7"
-    geo_redundant_backup = "Disabled"
+    geo_redundant_backup  = "Disabled"
   }
 }
 
-variable "web_replicas" {
-  description = "Number of web replicas to execute"
-  default = "2"
+variable "web_resources" {
+  type = map
+  default = {
+    replicas = 2
+    cpu_limit = "256m"
+    memory_limit = "512M"
+    cpu_request = "32m"
+    memory_request = "64M"
+  }
 }
 
-variable "worker_replicas" {
-  description = "Number of worker replicas to execute"
-  default = "2"
+variable "worker_resources" {
+  type = map
+  default = {
+    replicas = 4
+    cpu_limit = "512m"
+    memory_limit = "2048M"
+    cpu_request = "256m"
+    memory_request = "2048M"
+  }
 }
 
-variable "minio_replicas" {
-  description = "Number of minio replicas to execute"
-  default = "4"
+variable "minio_resources" {
+  type = map
+  default = {
+    replicas = 2
+    cpu_limit = "256m"
+    memory_limit = "512M"
+    cpu_request = "32m"
+    memory_request = "64M"
+  }
 }
 
-variable "traefik_replicas" {
-  description = "Number of traefik replicas to deploy"
-  default = "2"
+variable "traefik_resources" {
+  type = map
+  default = {
+    replicas = 2
+    cpu_limit = "256m"
+    memory_limit = "512M"
+    cpu_request = "32m"
+    memory_request = "64M"
+  }
 }
 
 variable "codecov_yml" {
   description = "Path to your codecov.yml"
-  default = "codecov.yml"
+  default     = "codecov.yml"
 }
 
 variable "ingress_host" {
@@ -81,15 +100,33 @@ variable "ingress_host" {
 
 variable "enable_https" {
   description = "Enables https ingress.  Requires TLS cert and key"
-  default = "0"
+  default     = "0"
 }
 
 variable "tls_key" {
   description = "Path to private key to use for TLS"
-  default = ""
+  default     = ""
 }
 
 variable "tls_cert" {
   description = "Path to certificate to use for TLS"
+  default     = ""
+}
+
+variable "ssh_public_key" {
+  description = "SSH key to install on k8s cluster instances"
+}
+
+variable "resource_tags" {
+  type = map
+  default = {
+    application = "codecov"
+    environment = "test"
+  }
+}
+
+# 
+variable "scm_ca_cert" {
+  description = "SCM CA certificate path"
   default = ""
 }
