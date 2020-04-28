@@ -1,6 +1,7 @@
 locals {
   postgres_username = "${azurerm_postgresql_server.codecov.administrator_login}@${azurerm_postgresql_server.codecov.name}"
-  postgres_password = "${azurerm_postgresql_server.codecov.administrator_login_password}"
-  postgres_host = "${azurerm_postgresql_server.codecov.fqdn}:5432"
-  redis_url = "redis://${azurerm_redis_cache.codecov.hostname}:${azurerm_redis_cache.codecov.port}"
+  postgres_password = azurerm_postgresql_server.codecov.administrator_login_password
+  postgres_host     = "${azurerm_postgresql_server.codecov.fqdn}:5432"
+  redis_url         = "redis://${azurerm_redis_cache.codecov.hostname}:${azurerm_redis_cache.codecov.port}"
 }
+

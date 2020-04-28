@@ -60,21 +60,30 @@ defined in a `terraform.tfvars` file.  More info on
 | `location` | Azure location | eastus |
 | `azurerm_client_id` | `appId` from the SP creation output | |
 | `azurerm_client_secret` | `password` from the SP creation output | |
-| `codecov_version` | Version of codecov enterprise to deploy | 4.4.7 |
-| `cluster_name` | Google Kubernetes Engine (GKE) cluster name | default-codecov-cluster |
+| `codecov_version` | Version of codecov enterprise to deploy | 4.4.12 |
+| `cluster_name` | Azure Kubernetes Service (AKS) cluster name | default-codecov-cluster |
 | `node_pool_count` | Number of nodes to configure in the node pool | 5 |
 | `node_pool_vm_size` | VM size to use for node pool nodes | Standard_B2s |
-| `postgres_sku` | PostgreSQL SKU (instance size and type) | See `variables.tf` |
+| `postgres_sku` | PostgreSQL SKU (instance size and type) | GP_Gen5_2 |
 | `postgres_storage_profile` | PostgreSQL size and type of disk storage | See `variables.tf` |
-| `web_replicas` | Number of web replicas to execute | 2 |
-| `worker_replicas` | Number of worker replicas to execute | 2 |
-| `minio_replicas` | Number of minio replicas to execute | 4 |
-| `traefik_replicas` | Number of traefik replicas to deploy | 2 |
+| `web_resources` | Map of resources for web k8s deployment | See `variables.tf` |
+| `worker_resources` | Map of resources for worker k8s deployment | See `variables.tf` |
+| `minio_resources` | Map of resources for minio k8s deployment | See `variables.tf` |
+| `traefik_resources` | Map of resources for traefik k8s deployment | See `variables.tf` |
 | `codecov_yml` | Path to your codecov.yml | codecov.yml |
 | `ingress_host` | Hostname used for http(s) ingress | |
 | `enable_https` | Enables https ingress.  Requires TLS cert and key | 0 |
 | `tls_key` | Path to private key to use for TLS | required if enable_https=1 |
 | `tls_cert` | Path to certificate to use for TLS | required if enable_https=1 |
+| `ssh_public_key` | SSH public key path, used for the Kubernetes cluster | |
+| `resource_tags` | Map of tags to include in compatible resources | `{application=codecov, environment=test}` |
+| `scm_ca_cert` | Optional SCM CA certificate path in PEM format | |
+
+### `scm_ca_cert`
+
+If `scm_ca_cert` is configured, it will be available to Codecov at
+`/cert/scm_ca_cert.pem`.  Include this path in your `codecov.yml` in the scm
+config.
 
 ## Executing terraform
 
@@ -99,15 +108,10 @@ terraform and create the stack following these steps:
      Outputs:
      
      ingress-lb-ip = xxx.xxx.xxx.xxx
-     minio-access-key = xxxxxxxxxxx
-     minio-secret-key = xxxxxxxxxxxxxxx
      ```
 1. The ingress IP and minio API keys are output at the end of the run.
    Create a DNS A record for the `ingress_host` above pointing at the
-   resulting `ingress-lb-ip`.  If you wish to use a tool to access your
-   reports through minio, you can use the key pair above to access it
-   using an s3-compatible tool like the [minio
-   client](https://docs.min.io/docs/minio-client-quickstart-guide).
+   resulting `ingress-lb-ip`.
 
 ## Destroying
 

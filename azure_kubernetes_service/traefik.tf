@@ -1,19 +1,20 @@
-
 resource "kubernetes_service_account" "traefik_ingress_controller" {
   metadata {
     name      = "traefik-ingress-controller"
     namespace = "default"
+    annotations = var.resource_tags
   }
 }
 
 resource "kubernetes_cluster_role_binding" "traefik_ingress_controller" {
   metadata {
     name = "traefik-ingress-controller"
+    annotations = var.resource_tags
   }
   subject {
     kind      = "ServiceAccount"
-    name      = "${kubernetes_service_account.traefik_ingress_controller.metadata.0.name}"
-    namespace = "${kubernetes_service_account.traefik_ingress_controller.metadata.0.namespace}"
+    name      = kubernetes_service_account.traefik_ingress_controller.metadata.0.name
+    namespace = kubernetes_service_account.traefik_ingress_controller.metadata.0.namespace
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -54,8 +55,9 @@ EOF
 resource "kubernetes_config_map" "traefik-toml" {
   metadata {
     name = "traefik-config"
+    annotations = var.resource_tags
   }
-  data {
+  data = {
     "traefik.toml" = "${element(concat(data.template_file.traefik-toml-http.*.rendered,data.template_file.traefik-toml-https.*.rendered),0)}"
   }
 }
@@ -63,33 +65,35 @@ resource "kubernetes_config_map" "traefik-toml" {
 resource "kubernetes_secret" "traefik-tls" {
   metadata {
     name = "traefik-tls"
+    annotations = var.resource_tags
   }
   type = "tls"
-  data {
-    tls.key = "${file("${var.tls_key}")}"
-    tls.crt = "${file("${var.tls_cert}")}"
+  data = {
+    "tls.key" = file(var.tls_key)
+    "tls.crt" = file(var.tls_cert)
   }
 }
 
 resource "kubernetes_deployment" "traefik" {
   metadata {
     name = "traefik-ingress-controller"
+    annotations = var.resource_tags
   }
   spec {
-    replicas = "${var.traefik_replicas}"
+    replicas = var.traefik_resources["replicas"]
     selector {
-      match_labels {
+      match_labels = {
         app = "traefik-ingress-controller" 
       }
     }
     template {
       metadata {
-        labels {
+        labels = {
           app = "traefik-ingress-controller"
         }
       }
       spec {
-        service_account_name = "${kubernetes_service_account.traefik_ingress_controller.metadata.0.name}"
+        service_account_name = kubernetes_service_account.traefik_ingress_controller.metadata.0.name
         volume {
           name = "config"
           config_map {
@@ -103,9 +107,9 @@ resource "kubernetes_deployment" "traefik" {
           }
         }
         volume {
-          name = "${kubernetes_service_account.traefik_ingress_controller.default_secret_name}"
+          name = kubernetes_service_account.traefik_ingress_controller.default_secret_name
           secret {
-            secret_name = "${kubernetes_service_account.traefik_ingress_controller.default_secret_name}"
+            secret_name = kubernetes_service_account.traefik_ingress_controller.default_secret_name
           }
         }
         container {
@@ -133,6 +137,16 @@ resource "kubernetes_deployment" "traefik" {
             name = "KUBERNETES_SERVICE_PORT"
             value = "443"
           }
+          resources {
+            limits {
+              cpu    = var.traefik_resources["cpu_limit"]
+              memory = var.traefik_resources["memory_limit"]
+            }
+            requests {
+              cpu    = var.traefik_resources["cpu_request"]
+              memory = var.traefik_resources["memory_request"]
+            }
+          }
           volume_mount {
             name = "config"
             read_only = "true"
@@ -147,7 +161,7 @@ resource "kubernetes_deployment" "traefik" {
           # https://github.com/kubernetes/kubernetes/issues/27973
           # https://github.com/terraform-providers/terraform-provider-kubernetes/issues/38
           volume_mount {
-            name       = "${kubernetes_service_account.traefik_ingress_controller.default_secret_name}"
+            name       = kubernetes_service_account.traefik_ingress_controller.default_secret_name
             read_only  = "true"
             mount_path = "/var/run/secrets/kubernetes.io/serviceaccount"
           }
@@ -163,6 +177,7 @@ resource "kubernetes_deployment" "traefik" {
 resource "kubernetes_service" "traefik" {
   metadata {
     name = "traefik"
+    annotations = var.resource_tags
   }
   spec {
     port {
@@ -177,7 +192,7 @@ resource "kubernetes_service" "traefik" {
       port        = "443"
       target_port = "443"
     }
-    selector {
+    selector = {
       app = "traefik-ingress-controller"
     }
     type = "LoadBalancer"
@@ -187,13 +202,15 @@ resource "kubernetes_service" "traefik" {
 resource "kubernetes_ingress" "traefik" {
   metadata {
     name = "traefik"
-    annotations {
-      "kubernetes.io/ingress.class" = "traefik"
-    }
+    annotations = merge({
+        "kubernetes.io/ingress.class" = "traefik"
+      },
+      var.resource_tags
+    )
   }
   spec {
     rule {
-      host = "${var.ingress_host}"
+      host = var.ingress_host
       http {
         path {
           path = "/"
@@ -202,29 +219,15 @@ resource "kubernetes_ingress" "traefik" {
             service_port = "5000"
           }
         }
-        path {
-          path = "/${azurerm_storage_account.minio.name}"
-          backend {
-            service_name = "minio"
-            service_port = "9000"
-          }
-        }
-        path {
-          path = "/minio"
-          backend {
-            service_name = "minio"
-            service_port = "9000"
-          }
-        }
       }
     }
   }
 }
 
 locals {
-  lb_name_split = "${split("-",kubernetes_service.traefik.load_balancer_ingress.0.hostname)}"
+  lb_name_split = split("-",kubernetes_service.traefik.load_balancer_ingress.0.hostname)
 }
 
 output "ingress-lb-ip" {
-  value = "${kubernetes_service.traefik.load_balancer_ingress.0.ip}"
+  value = kubernetes_service.traefik.load_balancer_ingress.0.ip
 }
