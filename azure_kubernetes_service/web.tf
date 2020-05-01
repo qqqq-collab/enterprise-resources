@@ -1,26 +1,18 @@
-resource "kubernetes_secret" "codecov-yml" {
-  metadata {
-    name = "codecov-yml"
-  }
-  data {
-    "codecov.yml" = "${file("${var.codecov_yml}")}"
-  }
-}
-
 resource "kubernetes_deployment" "web" {
   metadata {
     name = "web"
+    annotations = var.resource_tags
   }
   spec {
-    replicas = "${var.web_replicas}"
+    replicas = var.web_resources["replicas"]
     selector {
-      match_labels {
+      match_labels = {
         app = "web"
       }
     }
     template {
       metadata {
-        labels {
+        labels = {
           app = "web"
         }
       }
@@ -28,7 +20,13 @@ resource "kubernetes_deployment" "web" {
         volume {
           name = "codecov-yml"
           secret {
-            secret_name = "${kubernetes_secret.codecov-yml.metadata.0.name}"
+            secret_name = kubernetes_secret.codecov-yml.metadata[0].name
+          }
+        }
+        volume {
+          name = "scm-ca-cert"
+          secret {
+            secret_name = kubernetes_secret.scm-ca-cert.metadata[0].name
           }
         }
         container {
@@ -47,38 +45,34 @@ resource "kubernetes_deployment" "web" {
             }
           }
           env {
-            name = "MINIO_PORT_9000_TCP_ADDR"
+            name  = "DATABASE_USERNAME"
+            value = local.postgres_username
+          }
+          env {
+            name  = "DATABASE_PASSWORD"
+            value = local.postgres_password
+          }
+          env {
+            name  = "DATABASE_HOST"
+            value = local.postgres_host
+          }
+          env {
+            name  = "SERVICES__REDIS_URL"
+            value = local.redis_url
+          }
+          env {
+            name = "SERVICES__MINIO__HOST"
             value = "minio"
           }
           env {
-            name = "MINIO_PORT_9000_TCP_PORT"
+            name = "SERVICES__MINIO__PORT"
             value = "9000"
-          }
-#          env {
-#            name = "SERVICES__DATABASE_URL"
-#            value = "${local.postgres_url}"
-#          }
-          env {
-            name = "DATABASE_USERNAME"
-            value = "${local.postgres_username}"
-          }
-          env {
-            name = "DATABASE_PASSWORD"
-            value = "${local.postgres_password}"
-          }
-          env {
-            name = "DATABASE_HOST"
-            value = "${local.postgres_host}"
-          }
-          env {
-            name = "SERVICES__REDIS_URL"
-            value = "${local.redis_url}"
           }
           env {
             name = "SERVICES__MINIO__ACCESS_KEY_ID"
             value_from {
               secret_key_ref {
-                name = "${kubernetes_secret.minio-access-key.metadata.0.name}"
+                name = kubernetes_secret.minio-access-key.metadata.0.name
                 key  = "MINIO_ACCESS_KEY"
               }
             }
@@ -87,23 +81,23 @@ resource "kubernetes_deployment" "web" {
             name = "SERVICES__MINIO__SECRET_ACCESS_KEY"
             value_from {
               secret_key_ref {
-                name = "${kubernetes_secret.minio-secret-key.metadata.0.name}"
+                name = kubernetes_secret.minio-secret-key.metadata.0.name
                 key  = "MINIO_SECRET_KEY"
               }
             }
           }
           env {
             name = "SERVICES__MINIO__BUCKET"
-            value = "${azurerm_storage_account.minio.name}"
+            value = azurerm_storage_account.minio.name
           }
           resources {
             limits {
-              cpu    = "256m"
-              memory = "512M"
+              cpu    = var.web_resources["cpu_limit"]
+              memory = var.web_resources["memory_limit"]
             }
             requests {
-              cpu    = "32m"
-              memory = "64M"
+              cpu    = var.web_resources["cpu_request"]
+              memory = var.web_resources["memory_request"]
             }
           }
           readiness_probe {
@@ -116,9 +110,14 @@ resource "kubernetes_deployment" "web" {
           }
           image_pull_policy = "Always"
           volume_mount {
-            name = "codecov-yml"
-            read_only = "true"
+            name       = "codecov-yml"
+            read_only  = "true"
             mount_path = "/config"
+          }
+          volume_mount {
+            name       = "scm-ca-cert"
+            read_only  = "true"
+            mount_path = "/cert"
           }
         }
       }
@@ -129,6 +128,7 @@ resource "kubernetes_deployment" "web" {
 resource "kubernetes_service" "web" {
   metadata {
     name = "web"
+    annotations = var.resource_tags
   }
   spec {
     port {
@@ -136,7 +136,7 @@ resource "kubernetes_service" "web" {
       port        = "5000"
       target_port = "5000"
     }
-    selector {
+    selector = {
       app = "web"
     }
   }
