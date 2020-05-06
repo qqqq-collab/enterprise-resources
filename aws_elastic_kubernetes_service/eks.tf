@@ -5,44 +5,34 @@
 # using the `role` label.
 
 locals {
-  worker_groups_launch_template = [
+  worker_groups = [
     {
-      name = "web"
-      instance_type = "${var.web_node_type}"
-      subnets = "${join(",", module.vpc.private_subnets)}"
-      asg_desired_capacity = "${var.web_nodes}"
-      kubelet_extra_args = "--node-labels=kubernetes.io/role=web"
-      eni_delete = "true"
+      name                 = "web"
+      instance_type        = var.web_node_type
+      subnets              = module.vpc.private_subnets
+      asg_desired_capacity = var.web_nodes
+      kubelet_extra_args   = "--node-labels=kubernetes.io/role=web"
+      eni_delete           = "true"
     },
     {
-      name = "worker"
-      instance_type = "${var.worker_node_type}"
-      subnets = "${join(",", module.vpc.private_subnets)}"
-      asg_desired_capacity = "${var.worker_nodes}"
-      kubelet_extra_args = "--node-labels=kubernetes.io/role=worker"
-      eni_delete = "true"
-    },
-    {
-      name = "minio"
-      instance_type = "${var.minio_node_type}"
-      subnets = "${join(",", module.vpc.private_subnets)}"
-      asg_desired_capacity = "${var.minio_nodes}"
-      kubelet_extra_args = "--node-labels=kubernetes.io/role=minio"
-      eni_delete = "true"
+      name                 = "worker"
+      instance_type        = var.worker_node_type
+      subnets              = module.vpc.private_subnets
+      asg_desired_capacity = var.worker_nodes
+      kubelet_extra_args   = "--node-labels=kubernetes.io/role=worker"
+      eni_delete           = "true"
     },
   ]
 }
 
 module "eks" {
-  source = "terraform-aws-modules/eks/aws"
-  version = "4.0.1"
-  cluster_name = "${var.cluster_name}"
-  subnets = ["${module.vpc.private_subnets}"]
-  vpc_id = "${module.vpc.vpc_id}"
-  worker_group_count = "0"
-  worker_groups_launch_template = "${local.worker_groups_launch_template}"
-  worker_group_launch_template_count = "3"
-  cluster_enabled_log_types = ["api","controllerManager","scheduler"]
-  workers_additional_policies = ["${aws_iam_policy.worker-s3.id}"]
-  workers_additional_policies_count = "1"
+  source                             = "terraform-aws-modules/eks/aws"
+  version                            = "11.1.0"
+  cluster_name                       = var.cluster_name
+  subnets                            = module.vpc.private_subnets
+  vpc_id                             = module.vpc.vpc_id
+  worker_groups                      = local.worker_groups
+  cluster_enabled_log_types          = ["api", "controllerManager", "scheduler"]
+  workers_additional_policies        = [aws_iam_policy.minio-s3.id]
 }
+

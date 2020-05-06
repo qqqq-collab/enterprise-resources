@@ -1,37 +1,35 @@
-resource "kubernetes_secret" "codecov-yml" {
-  metadata {
-    name = "codecov-yml"
-  }
-  data {
-    "codecov.yml" = "${file("${var.codecov_yml}")}"
-  }
-}
-
 resource "kubernetes_deployment" "web" {
   metadata {
     name = "web"
+    annotations = var.resource_tags
   }
   spec {
-    replicas = "${var.web_replicas}"
+    replicas = var.web_replicas
     selector {
-      match_labels {
+      match_labels = {
         app = "web"
       }
     }
     template {
       metadata {
-        labels {
+        labels = {
           app = "web"
         }
       }
       spec {
-        node_selector {
+        node_selector = {
           "kubernetes.io/role" = "web"
         }
         volume {
           name = "codecov-yml"
           secret {
-            secret_name = "${kubernetes_secret.codecov-yml.metadata.0.name}"
+            secret_name = kubernetes_secret.codecov-yml.metadata[0].name
+          }
+        }
+        volume {
+          name = "scm-ca-cert"
+          secret {
+            secret_name = kubernetes_secret.scm-ca-cert.metadata[0].name
           }
         }
         container {
@@ -50,26 +48,26 @@ resource "kubernetes_deployment" "web" {
             }
           }
           env {
-            name = "MINIO_PORT_9000_TCP_ADDR"
-            value = "minio"
+            name  = "SERVICES__DATABASE_URL"
+            value = local.postgres_url
           }
           env {
-            name = "MINIO_PORT_9000_TCP_PORT"
-            value = "9000"
+            name  = "SERVICES__REDIS_URL"
+            value = local.redis_url
           }
           env {
-            name = "SERVICES__DATABASE_URL"
-            value = "${local.postgres_url}"
+            name  = "SERVICES__MINIO__HOST"
+            value = "s3.amazonaws.com"
           }
           env {
-            name = "SERVICES__REDIS_URL"
-            value = "${local.redis_url}"
+            name  = "SERVICES__MINIO__BUCKET"
+            value = aws_s3_bucket.minio.id
           }
           env {
             name = "SERVICES__MINIO__ACCESS_KEY_ID"
             value_from {
               secret_key_ref {
-                name = "${kubernetes_secret.minio-access-key.metadata.0.name}"
+                name = kubernetes_secret.minio-access-key.metadata[0].name
                 key  = "MINIO_ACCESS_KEY"
               }
             }
@@ -78,14 +76,10 @@ resource "kubernetes_deployment" "web" {
             name = "SERVICES__MINIO__SECRET_ACCESS_KEY"
             value_from {
               secret_key_ref {
-                name = "${kubernetes_secret.minio-secret-key.metadata.0.name}"
+                name = kubernetes_secret.minio-secret-key.metadata[0].name
                 key  = "MINIO_SECRET_KEY"
               }
             }
-          }
-          env {
-            name = "SERVICES__MINIO__BUCKET"
-            value = "${aws_s3_bucket.minio.id}"
           }
           resources {
             limits {
@@ -107,9 +101,14 @@ resource "kubernetes_deployment" "web" {
           }
           image_pull_policy = "Always"
           volume_mount {
-            name = "codecov-yml"
-            read_only = "true"
+            name       = "codecov-yml"
+            read_only  = "true"
             mount_path = "/config"
+          }
+          volume_mount {
+            name       = "scm-ca-cert"
+            read_only  = "true"
+            mount_path = "/cert"
           }
         }
       }
@@ -120,6 +119,7 @@ resource "kubernetes_deployment" "web" {
 resource "kubernetes_service" "web" {
   metadata {
     name = "web"
+    annotations = var.resource_tags
   }
   spec {
     port {
@@ -127,7 +127,7 @@ resource "kubernetes_service" "web" {
       port        = "5000"
       target_port = "5000"
     }
-    selector {
+    selector = {
       app = "web"
     }
   }
