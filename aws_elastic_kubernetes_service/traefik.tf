@@ -102,7 +102,7 @@ resource "kubernetes_deployment" "traefik" {
     annotations = var.resource_tags
   }
   spec {
-    replicas = var.traefik_replicas
+    replicas = var.traefik_resources["replicas"]
     selector {
       match_labels = {
         app = "traefik"
@@ -161,6 +161,16 @@ resource "kubernetes_deployment" "traefik" {
           env {
             name  = "KUBERNETES_SERVICE_PORT"
             value = "443"
+          }
+          resources {
+            limits {
+              cpu    = var.traefik_resources["cpu_limit"]
+              memory = var.traefik_resources["memory_limit"]
+            }
+            requests {
+              cpu    = var.traefik_resources["cpu_request"]
+              memory = var.traefik_resources["memory_request"]
+            }
           }
           volume_mount {
             name       = "config"

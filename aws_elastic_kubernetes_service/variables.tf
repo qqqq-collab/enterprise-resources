@@ -26,7 +26,7 @@ variable "postgres_skip_final_snapshot" {
 
 variable "redis_node_type" {
   description = "Node type to use for redis cluster nodes"
-  default     = "cache.t2.micro"
+  default     = "cache.t3.micro"
 }
 
 variable "redis_num_nodes" {
@@ -41,27 +41,50 @@ variable "web_nodes" {
 
 variable "web_node_type" {
   description = "Instance type to use for web nodes"
-  default     = "t2.medium"
+  default     = "t3.medium"
 }
 
 variable "worker_nodes" {
   description = "Number of worker nodes to create"
-  default     = "3"
+  default     = "2"
 }
 
 variable "worker_node_type" {
   description = "Instance type to use for worker nodes"
-  default     = "t2.medium"
+  default     = "t3.large"
 }
 
-variable "web_replicas" {
-  description = "Number of web replicas to execute"
-  default     = "2"
+variable "web_resources" {
+  type = map
+  default = {
+    replicas = 2
+    cpu_limit = "256m"
+    memory_limit = "512M"
+    cpu_request = "32m"
+    memory_request = "64M"
+  }
 }
 
-variable "worker_replicas" {
-  description = "Number of worker replicas to execute"
-  default     = "4"
+variable "worker_resources" {
+  type = map
+  default = {
+    replicas = 4
+    cpu_limit = "512m"
+    memory_limit = "2048M"
+    cpu_request = "256m"
+    memory_request = "2048M"
+  }
+}
+
+variable "traefik_resources" {
+  type = map
+  default = {
+    replicas = 2
+    cpu_limit = "256m"
+    memory_limit = "512M"
+    cpu_request = "32m"
+    memory_request = "64M"
+  }
 }
 
 variable "codecov_yml" {
@@ -71,11 +94,6 @@ variable "codecov_yml" {
 
 variable "ingress_host" {
   description = "Hostname used for http(s) ingress"
-}
-
-variable "traefik_replicas" {
-  description = "Number of traefik replicas to deploy"
-  default     = "2"
 }
 
 variable "enable_https" {

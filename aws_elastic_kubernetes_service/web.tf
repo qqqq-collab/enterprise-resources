@@ -4,7 +4,7 @@ resource "kubernetes_deployment" "web" {
     annotations = var.resource_tags
   }
   spec {
-    replicas = var.web_replicas
+    replicas = var.web_resources["replicas"]
     selector {
       match_labels = {
         app = "web"
@@ -83,12 +83,12 @@ resource "kubernetes_deployment" "web" {
           }
           resources {
             limits {
-              cpu    = "256m"
-              memory = "512M"
+              cpu    = var.web_resources["cpu_limit"]
+              memory = var.web_resources["memory_limit"]
             }
             requests {
-              cpu    = "32m"
-              memory = "64M"
+              cpu    = var.web_resources["cpu_request"]
+              memory = var.web_resources["memory_request"]
             }
           }
           readiness_probe {

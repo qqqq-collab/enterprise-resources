@@ -68,11 +68,11 @@ defined in a `terraform.tfvars` file.  More info on
 | `web_node_type` | Instance type to use for web nodes | t2.medium |
 | `worker_nodes` | Number of worker nodes to create | 3 |
 | `worker_node_type` | Instance type to use for worker nodes | t2.medium |
-| `web_replicas` | Number of web replicas to execute | 2 |
-| `worker_replicas` | Number of worker replicas to execute | 2 |
+| `web_resources` | Map of resources for web k8s deployment | See `variables.tf` |
+| `worker_resources` | Map of resources for worker k8s deployment | See `variables.tf` |
+| `traefik_resources` | Map of resources for traefik k8s deployment | See `variables.tf` |
 | `codecov_yml` | Path to your codecov.yml | codecov.yml |
 | `ingress_host` | Hostname used for http(s) ingress | |
-| `traefik_replicas` | Number of traefik replicas to deploy | 2 |
 | `enable_https` | Enables https ingress.  Requires TLS cert and key | 0 |
 | `tls_key` | Path to private key to use for TLS | required if enable_https=1 |
 | `tls_cert` | Path to certificate to use for TLS | required if enable_https=1 |
