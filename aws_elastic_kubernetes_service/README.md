@@ -66,19 +66,24 @@ defined in a `terraform.tfvars` file.  More info on
 | `redis_num_nodes` | Number of nodes to run in the redis cluster | 1 |
 | `web_nodes` | Number of web nodes to create | 2 |
 | `web_node_type` | Instance type to use for web nodes | t2.medium |
-| `worker_nodes` | Number of worker nodes to create | 2 |
+| `worker_nodes` | Number of worker nodes to create | 3 |
 | `worker_node_type` | Instance type to use for worker nodes | t2.medium |
-| `minio_nodes` | Number of minio nodes to create | 4 |
-| `minio_node_type` | Instance type to use for minio nodes | t2.medium |
-| `web_replicas` | Number of web replicas to execute | 2 |
-| `worker_replicas` | Number of worker replicas to execute | 2 |
-| `minio_replicas` | Number of minio replicas to execute | 4 |
+| `web_resources` | Map of resources for web k8s deployment | See `variables.tf` |
+| `worker_resources` | Map of resources for worker k8s deployment | See `variables.tf` |
+| `traefik_resources` | Map of resources for traefik k8s deployment | See `variables.tf` |
 | `codecov_yml` | Path to your codecov.yml | codecov.yml |
 | `ingress_host` | Hostname used for http(s) ingress | |
-| `traefik_replicas` | Number of traefik replicas to deploy | 2 |
 | `enable_https` | Enables https ingress.  Requires TLS cert and key | 0 |
 | `tls_key` | Path to private key to use for TLS | required if enable_https=1 |
 | `tls_cert` | Path to certificate to use for TLS | required if enable_https=1 |
+| `scm_ca_cert` | Optional SCM CA certificate path in PEM format | |
+
+### `scm_ca_cert`
+
+If `scm_ca_cert` is configured, it will be available to Codecov at
+`/cert/scm_ca_cert.pem`.  Include this path in your `codecov.yml` in the scm
+config.
+
 
 ## Executing terraform
 
@@ -108,8 +113,6 @@ terraform and create the stack following these steps:
      Outputs:
      
      ingress-lb-hostname = xxxx.elb.amazonaws.com
-     minio-access-key = xxxxxxxxxxx
-     minio-secret-key = xxxxxxxxxxxxxxx
      ```
 1. The ingress hostname and minio API keys are output at the end of the run.
    Create a DNS CNAME record for the `ingress_host` above pointing at the
