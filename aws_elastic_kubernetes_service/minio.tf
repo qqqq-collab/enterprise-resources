@@ -1,178 +1,89 @@
-resource "aws_iam_policy" "worker-s3" {
-  name = "codecov-eks-worker-s3"
-
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "allowObjectActions",
-      "Action": [
-        "s3:putObject",
-        "s3:getObject",
-        "s3:deleteObject"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:aws:s3:::${aws_s3_bucket.minio.id}/*"
-    },
-    {
-      "Sid": "allowListBucket",
-      "Action": [
-        "s3:listBucket"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:aws:s3:::${aws_s3_bucket.minio.id}"
-    },
-    {
-      "Sid": "allowListAllMyBuckets",
-      "Action": [
-        "s3:ListAllMyBuckets"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:aws:s3:::*"
-    }
-  ]
+resource "aws_iam_policy" "minio-s3" {
+  name = "codecov-minio-s3"
+  policy = data.aws_iam_policy_document.minio-s3.json
 }
-EOF
+
+data "aws_iam_policy_document" "minio-s3" {
+  statement {
+    sid = "AllowObjectActions"
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:GetObject",
+      "s3:DeleteObject"
+    ]
+    resources = [
+      "${aws_s3_bucket.minio.arn}/*"
+    ]
+  }
+
+  statement {
+    sid = "AllowListBucket"
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket"
+    ]
+    resources = [
+      aws_s3_bucket.minio.arn
+    ]
+  }
+
+  statement {
+    sid = "AllowAllS3"
+    effect = "Allow"
+    actions = [
+      "s3:ListAllMyBuckets",
+      "s3:GetBucketLocation"
+    ]
+    resources = [
+      "*"
+    ]
+  }
+}
+
+resource "aws_iam_user" "minio-s3" {
+  name = "minio-codecov-enterprise"
+
+  tags = var.resource_tags
+}
+
+resource "aws_iam_access_key" "minio-s3" {
+  user = aws_iam_user.minio-s3.name
+}
+
+resource "aws_iam_user_policy_attachment" "minio-s3" {
+  user = aws_iam_user.minio-s3.name
+  policy_arn = aws_iam_policy.minio-s3.arn
 }
 
 resource "random_pet" "minio-bucket-suffix" {
-  length = "2"
+  length    = "2"
   separator = "-"
 }
 
 resource "aws_s3_bucket" "minio" {
   bucket = "codecov-minio-${random_pet.minio-bucket-suffix.id}"
-  acl = "private"
-}
+  acl    = "private"
 
-resource "random_id" "minio-access-key" {
-  byte_length = "12"
-}
-
-output "minio-access-key" {
-  value = "${random_id.minio-access-key.b64_url}"
+  tags = var.resource_tags
 }
 
 resource "kubernetes_secret" "minio-access-key" {
   metadata {
     name = "minio-access-key"
+    annotations = var.resource_tags
   }
-  data {
-    MINIO_ACCESS_KEY = "${random_id.minio-access-key.b64_url}"
+  data = {
+    MINIO_ACCESS_KEY = aws_iam_access_key.minio-s3.id
   }
-}
-
-resource "random_id" "minio-secret-key" {
-  byte_length = "16"
-}
-
-output "minio-secret-key" {
-  value = "${random_id.minio-secret-key.b64_url}"
 }
 
 resource "kubernetes_secret" "minio-secret-key" {
   metadata {
     name = "minio-secret-key"
+    annotations = var.resource_tags
   }
-  data {
-    MINIO_SECRET_KEY = "${random_id.minio-secret-key.b64_url}"
-  }
-}
-
-resource "kubernetes_deployment" "minio_storage" {
-  metadata {
-    name = "minio"
-  }
-  spec {
-    replicas = "${var.minio_replicas}"
-    selector {
-      match_labels {
-        app = "minio-storage"
-      }
-    }
-    template {
-      metadata {
-        labels {
-          app = "minio-storage"
-        }
-      }
-      spec {
-        node_selector {
-          "kubernetes.io/role" = "minio"
-        }
-        container {
-          name  = "minio"
-          image = "minio/minio:RELEASE.2019-04-09T01-22-30Z"
-          args  = ["gateway", "s3"]
-          port {
-            container_port = 9000
-          }
-          env {
-            name = "MINIO_ACCESS_KEY"
-            value_from {
-              secret_key_ref {
-                name = "${kubernetes_secret.minio-access-key.metadata.0.name}"
-                key  = "MINIO_ACCESS_KEY"
-              }
-            }
-          }
-          env {
-            name = "MINIO_SECRET_KEY"
-            value_from {
-              secret_key_ref {
-                name = "${kubernetes_secret.minio-secret-key.metadata.0.name}"
-                key  = "MINIO_SECRET_KEY"
-              }
-            }
-          }
-          resources {
-            limits {
-              cpu    = "256m"
-              memory = "512M"
-            }
-            requests {
-              cpu    = "32m"
-              memory = "64M"
-            }
-          }
-          liveness_probe {
-            http_get {
-              path = "/minio/health/live"
-              port = "9000"
-            }
-            initial_delay_seconds = 5
-            period_seconds        = 5
-          }
-          readiness_probe {
-            http_get {
-              path = "/minio/health/live"
-              port = "9000"
-            }
-            initial_delay_seconds = 5
-            period_seconds        = 5
-          }
-        }
-      }
-    }
-    strategy {
-      type = "Recreate"
-    }
-  }
-}
-
-resource "kubernetes_service" "minio" {
-  metadata {
-    name = "minio"
-  }
-  spec {
-    port {
-      protocol    = "TCP"
-      port        = 9000
-      target_port = "9000"
-    }
-    selector {
-      app = "minio-storage"
-    }
+  data = {
+    MINIO_SECRET_KEY = aws_iam_access_key.minio-s3.secret
   }
 }

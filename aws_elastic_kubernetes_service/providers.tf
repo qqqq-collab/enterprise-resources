@@ -1,7 +1,3 @@
-terraform {
-  version = "~>0.11"
-}
-
 provider "local" {
   version = "~>1.2"
 }
@@ -17,3 +13,4 @@ provider "random" {
 provider "template" {
   version = "~>2.1"
 }
+
