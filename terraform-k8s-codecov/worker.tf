@@ -3,15 +3,15 @@ resource "kubernetes_deployment" "worker" {
     name = "worker"
   }
   spec {
-    replicas = "${var.worker_replicas}"
+    replicas = var.worker_replicas
     selector {
-      match_labels {
+      match_labels = {
         app = "worker"
       }
     }
     template {
       metadata {
-        labels {
+        labels = {
           app = "worker"
         }
       }
@@ -19,12 +19,12 @@ resource "kubernetes_deployment" "worker" {
         volume {
           name = "codecov-yml"
           secret {
-            secret_name = "${kubernetes_secret.codecov-yml.metadata.0.name}"
+            secret_name = kubernetes_secret.codecov-yml.metadata[0].name
           }
         }
         container {
           name  = "workers"
-          image = "codecov/enterprise:v4.4.4"
+          image = "codecov/enterprise:v${var.codecov_version}"
           args  = ["worker", "--queue celery,uploads", "--concurrency 1"]
           env {
             name = "STATSD_HOST"
@@ -33,14 +33,6 @@ resource "kubernetes_deployment" "worker" {
                 field_path = "status.hostIP"
               }
             }
-          }
-          env {
-            name = "MINIO_PORT_9000_TCP_ADDR"
-            value = "minio"
-          }
-          env {
-            name = "MINIO_PORT_9000_TCP_PORT"
-            value = "9000"
           }
           resources {
             limits {
@@ -54,8 +46,8 @@ resource "kubernetes_deployment" "worker" {
           }
           image_pull_policy = "Always"
           volume_mount {
-            name = "codecov-yml"
-            read_only = "true"
+            name       = "codecov-yml"
+            read_only  = "true"
             mount_path = "/config"
           }
         }
@@ -66,3 +58,4 @@ resource "kubernetes_deployment" "worker" {
     }
   }
 }
+

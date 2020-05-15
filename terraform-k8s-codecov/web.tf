@@ -3,15 +3,15 @@ resource "kubernetes_deployment" "web" {
     name = "web"
   }
   spec {
-    replicas = "${var.web_replicas}"
+    replicas = var.web_replicas
     selector {
-      match_labels {
+      match_labels = {
         app = "web"
       }
     }
     template {
       metadata {
-        labels {
+        labels = {
           app = "web"
         }
       }
@@ -19,12 +19,12 @@ resource "kubernetes_deployment" "web" {
         volume {
           name = "codecov-yml"
           secret {
-            secret_name = "${kubernetes_secret.codecov-yml.metadata.0.name}"
+            secret_name = kubernetes_secret.codecov-yml.metadata[0].name
           }
         }
         container {
           name  = "web"
-          image = "codecov/enterprise:v4.4.4"
+          image = "codecov/enterprise:v${var.codecov_version}"
           args  = ["web"]
           port {
             container_port = 5000
@@ -36,14 +36,6 @@ resource "kubernetes_deployment" "web" {
                 field_path = "status.hostIP"
               }
             }
-          }
-          env {
-            name = "MINIO_PORT_9000_TCP_ADDR"
-            value = "minio"
-          }
-          env {
-            name = "MINIO_PORT_9000_TCP_PORT"
-            value = "9000"
           }
           resources {
             limits {
@@ -57,7 +49,7 @@ resource "kubernetes_deployment" "web" {
           }
           readiness_probe {
             http_get {
-              path = "/"
+              path = "/login"
               port = "5000"
             }
             initial_delay_seconds = 5
@@ -65,8 +57,8 @@ resource "kubernetes_deployment" "web" {
           }
           image_pull_policy = "Always"
           volume_mount {
-            name = "codecov-yml"
-            read_only = "true"
+            name       = "codecov-yml"
+            read_only  = "true"
             mount_path = "/config"
           }
         }
@@ -85,9 +77,10 @@ resource "kubernetes_service" "web" {
       port        = "5000"
       target_port = "5000"
     }
-    selector {
+    selector = {
       app = "web"
     }
     type = "NodePort"
   }
 }
+
