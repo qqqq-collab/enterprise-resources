@@ -58,12 +58,10 @@ defined in a `terraform.tfvars` file.  More info on
 | `cluster_name` | Google Kubernetes Engine (GKE) cluster name | default-codecov-cluster |
 | `web_node_pool_count` | Number of nodes to create in the web node pool | 1 |
 | `worker_node_pool_count` | Number of nodes to create in the worker node pool | 1 |
-| `minio_node_pool_count` | Number of nodes to create in the minio default node pool | 1 |
 | `node_pool_machine_type` | Machine type to use for the node pools | n1-standard-1 |
-| `web_replicas` | Number of web replicas to execute | 2 |
-| `worker_replicas` | Number of worker replicas to execute | 2 |
-| `minio_replicas` | Number of minio replicas to execute | 4 |
-| `traefik_replicas` | Number of traefik replicas to deploy | 2 |
+| `web_resources` | Map of resources for web k8s deployment | See `variables.tf` |
+| `worker_resources` | Map of resources for worker k8s deployment | See `variables.tf` |
+| `traefik_resources` | Map of resources for traefik k8s deployment | See `variables.tf` |
 | `minio_bucket_name` | Name of GCS bucket to create for minio | required |
 | `minio_bucket_location` | Name of GCS bucket to create for minio | US |
 | `minio_bucket_force_destroy` | Required to allow destroying a non-empty bucket | false |
@@ -76,6 +74,14 @@ defined in a `terraform.tfvars` file.  More info on
 | `enable_https` | Enables https ingress.  Requires TLS cert and key | 0 |
 | `tls_key` | Path to private key to use for TLS | required if enable_https=1 |
 | `tls_cert` | Path to certificate to use for TLS | required if enable_https=1  |
+| `resource_tags` | Map of tags to include in compatible resources | `{application=codecov, environment=test}` |
+| `scm_ca_cert` | Optional SCM CA certificate path in PEM format | |
+
+### `scm_ca_cert`
+
+If `scm_ca_cert` is configured, it will be available to Codecov at
+`/cert/scm_ca_cert.pem`.  Include this path in your `codecov.yml` in the scm
+config.
 
 ## Executing terraform
 
@@ -100,15 +106,10 @@ terraform and create the stack following these steps:
      Outputs:
      
      ingress-ip = xx.xx.xx.xx
-     minio-access-key = xxxxxxxxxxx
-     minio-secret-key = xxxxxxxxxxxxxxx
      ```
-1. The ingress IP and minio API keys are output at the end of the run.
+1. The ingress IP is output at the end of the run.
    Create a DNS A record for the `ingress_host` above pointing at the
-   resulting `ingress-ip`.  If you wish to use a tool to access your 
-   reports through minio, you can use the key pair above to access it 
-   using an s3-compatible tool like the [minio
-   client](https://docs.min.io/docs/minio-client-quickstart-guide).
+   resulting `ingress-ip`.  
 1. To show the outputs again: `terraform output`
 1. Google executes an upgrade on the cluster control plane after creation,
    so some operations (such as `plan` or `apply`) will be unable to 
