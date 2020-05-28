@@ -73,6 +73,7 @@ defined in a `terraform.tfvars` file.  More info on
 | `web_resources` | Map of resources for web k8s deployment | See `variables.tf` |
 | `worker_resources` | Map of resources for worker k8s deployment | See `variables.tf` |
 | `traefik_resources` | Map of resources for traefik k8s deployment | See `variables.tf` |
+| `enable_traefik` | Whether to include Traefik for ingress and HTTPS | 1 |
 | `codecov_yml` | Path to your codecov.yml | codecov.yml |
 | `ingress_host` | Hostname used for http(s) ingress | |
 | `enable_https` | Enables https ingress.  Requires TLS cert and key | 0 |
@@ -101,9 +102,7 @@ using AWS services to manage your domain and certificate.  To disable Traefik,
 include this in your `terraform.tfvars` file:
 
 ```
-traefik_resources = {
-  replicas=0
-}
+enable_traefik = 0
 ```
 
 ### Granting Codecov access to internal resources
