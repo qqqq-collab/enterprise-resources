@@ -34,7 +34,7 @@ resource "kubernetes_deployment" "worker" {
         }
         container {
           name  = "workers"
-          image = "codecov/enterprise:v${var.codecov_version}"
+          image = "codecov/enterprise-worker:v${var.codecov_version}"
           args  = ["worker", "--queue celery,uploads", "--concurrency 1"]
           env {
             name = "STATSD_HOST"
@@ -45,12 +45,8 @@ resource "kubernetes_deployment" "worker" {
             }
           }
           env {
-            name  = "MINIO_PORT_9000_TCP_ADDR"
-            value = "minio"
-          }
-          env {
-            name  = "MINIO_PORT_9000_TCP_PORT"
-            value = "9000"
+            name = "STATSD_PORT"
+            value = "8125"
           }
           env {
             name  = "SERVICES__DATABASE_URL"

@@ -26,6 +26,8 @@ for a fully robust deployment.
   user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html).
 - Attach the [AdministratorAccess
   policy](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_job-functions.html#jf_administrator) to your newly created user.
+  A log of IAM permissions used during the stack creation can be found in
+  [iam_permissions.txt](iam_permissions.txt).
 - [Create access
   keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html?icmpid=docs_iam_console)
   for your IAM user.
@@ -48,7 +50,7 @@ for a fully robust deployment.
 
 Configuration of Codecov enterprise is handled through a YAML config file.
 See [configuring codecov.yml](https://docs.codecov.io/docs/configuration) for 
-more info.  Refer to this example [codecov.yml](../codecov.yml.example) for the
+more info.  Refer to this example [codecov.yml](codecov.yml.example) for the
 minimum necessary configuration.
 
 The terraform stack is configured using terraform variables which can be
@@ -58,16 +60,16 @@ defined in a `terraform.tfvars` file.  More info on
 | name | description | default |
 | --- | --- | --- |
 | `region` | AWS region | us-east-1 |
-| `codecov_version` | Version of codecov enterprise to deploy | 4.4.7 |
+| `codecov_version` | Version of codecov enterprise to deploy | 4.5.0 |
 | `cluster_name` | Google Kubernetes Engine (GKE) cluster name | default-codecov-cluster |
-| `postgres_instance_class` | Instance class for PostgreSQL RDS instance | db.t3.micro |
+| `postgres_instance_class` | Instance class for PostgreSQL RDS instance | db.t3.medium |
 | `postgres_skip_final_snapshot` | Whether to skip taking a final snapshot when destroying the Postgres DB. It is recommended to keep this set to 0 in production in order to avoid unintended data loss. | 0 |
-| `redis_node_type` | Node type to use for redis cluster nodes | cache.t2.micro |
+| `redis_node_type` | Node type to use for redis cluster nodes | cache.t3.small |
 | `redis_num_nodes` | Number of nodes to run in the redis cluster | 1 |
 | `web_nodes` | Number of web nodes to create | 2 |
-| `web_node_type` | Instance type to use for web nodes | t2.medium |
+| `web_node_type` | Instance type to use for web nodes | t3.medium |
 | `worker_nodes` | Number of worker nodes to create | 3 |
-| `worker_node_type` | Instance type to use for worker nodes | t2.medium |
+| `worker_node_type` | Instance type to use for worker nodes | t3.large |
 | `web_resources` | Map of resources for web k8s deployment | See `variables.tf` |
 | `worker_resources` | Map of resources for worker k8s deployment | See `variables.tf` |
 | `traefik_resources` | Map of resources for traefik k8s deployment | See `variables.tf` |
@@ -76,6 +78,7 @@ defined in a `terraform.tfvars` file.  More info on
 | `enable_https` | Enables https ingress.  Requires TLS cert and key | 0 |
 | `tls_key` | Path to private key to use for TLS | required if enable_https=1 |
 | `tls_cert` | Path to certificate to use for TLS | required if enable_https=1 |
+| `resource_tags` | Map of tags to include in compatible resources | `{application=codecov, environment=test}` |
 | `scm_ca_cert` | Optional SCM CA certificate path in PEM format | |
 
 ### `scm_ca_cert`
@@ -84,6 +87,31 @@ If `scm_ca_cert` is configured, it will be available to Codecov at
 `/cert/scm_ca_cert.pem`.  Include this path in your `codecov.yml` in the scm
 config.
 
+### Instance Types
+
+The default instance types and number of instances are the minimum to get
+the Codecov application up and running.  Tuning these will be required,
+dependent on your specific use-case.
+
+### Traefik
+
+Traefik is included for ingress in order to support HTTPS, streamline the setup, 
+and make this stack as turn-key as possible.  It can be excluded in favor of 
+using AWS services to manage your domain and certificate.  To disable Traefik,
+include this in your `terraform.tfvars` file:
+
+```
+traefik_resources = {
+  replicas=0
+}
+```
+
+### Granting Codecov access to internal resources
+
+If your organization requires creating firewall rules to grant Codecov access
+to your internal resources, the IP address for the NAT gateway can be found in
+the terraform output.  All requests from Codecov Enterprise will originate from
+this address.
 
 ## Executing terraform
 
