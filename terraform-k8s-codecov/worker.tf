@@ -1,6 +1,7 @@
 resource "kubernetes_deployment" "worker" {
   metadata {
     name = "worker"
+    annotations = var.resource_tags
   }
   spec {
     replicas = var.worker_replicas
@@ -24,7 +25,7 @@ resource "kubernetes_deployment" "worker" {
         }
         container {
           name  = "workers"
-          image = "codecov/enterprise:v${var.codecov_version}"
+          image = "codecov/enterprise-worker:v${var.codecov_version}"
           args  = ["worker", "--queue celery,uploads", "--concurrency 1"]
           env {
             name = "STATSD_HOST"

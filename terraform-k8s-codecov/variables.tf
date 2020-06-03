@@ -1,6 +1,6 @@
 variable "codecov_version" {
   description = "Version of Codecov Enterprise to deploy"
-  default = "4.4.12"
+  default = "4.5.0"
 }
 
 variable "web_replicas" {
@@ -15,4 +15,18 @@ variable "worker_replicas" {
 
 variable "codecov_yml" {
   description = "Location of your codecov.yml file"
+}
+
+variable "resource_tags" {
+  type = map
+  default = {
+    application = "codecov"
+    environment = "test"
+  }
+}
+
+# 
+variable "scm_ca_cert" {
+  description = "SCM CA certificate path"
+  default = ""
 }

@@ -1,6 +1,7 @@
 resource "kubernetes_deployment" "web" {
   metadata {
     name = "web"
+    annotations = var.resource_tags
   }
   spec {
     replicas = var.web_replicas
@@ -22,9 +23,15 @@ resource "kubernetes_deployment" "web" {
             secret_name = kubernetes_secret.codecov-yml.metadata[0].name
           }
         }
+        volume {
+          name = "scm-ca-cert"
+          secret {
+            secret_name = kubernetes_secret.scm-ca-cert.metadata[0].name
+          }
+        }
         container {
           name  = "web"
-          image = "codecov/enterprise:v${var.codecov_version}"
+          image = "codecov/enterprise-web:v${var.codecov_version}"
           args  = ["web"]
           port {
             container_port = 5000
@@ -61,6 +68,11 @@ resource "kubernetes_deployment" "web" {
             read_only  = "true"
             mount_path = "/config"
           }
+          volume_mount {
+            name       = "scm-ca-cert"
+            read_only  = "true"
+            mount_path = "/cert"
+          }
         }
       }
     }
@@ -70,6 +82,7 @@ resource "kubernetes_deployment" "web" {
 resource "kubernetes_service" "web" {
   metadata {
     name = "web"
+    annotations = var.resource_tags
   }
   spec {
     port {
