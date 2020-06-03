@@ -91,6 +91,11 @@ variable "traefik_resources" {
   }
 }
 
+variable "enable_traefik" {
+  description = "Whether or not to include Traefik ingress"
+  default     = "1"
+}
+
 variable "codecov_yml" {
   description = "Path to your codecov.yml"
   default     = "codecov.yml"
