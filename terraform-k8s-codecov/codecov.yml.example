@@ -17,3 +17,6 @@ services:
     access_key_id: minio-access-key-id
     secret_access_key: minio-secret-key
     client_uploads: true
+
+# gitlab_enterprise:
+#   ssl_pem: /cert/scm_ca_cert.pem
