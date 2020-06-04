@@ -5,7 +5,7 @@ variable "region" {
 
 variable "codecov_version" {
   description = "Version of codecov enterprise to deploy"
-  default     = "4.4.12"
+  default     = "4.5.0"
 }
 
 variable "cluster_name" {
@@ -15,7 +15,7 @@ variable "cluster_name" {
 
 variable "postgres_instance_class" {
   description = "Instance class for PostgreSQL RDS instance"
-  default     = "db.t3.micro"
+  default     = "db.t3.medium"
 }
 
 variable "postgres_skip_final_snapshot" {
@@ -26,7 +26,7 @@ variable "postgres_skip_final_snapshot" {
 
 variable "redis_node_type" {
   description = "Node type to use for redis cluster nodes"
-  default     = "cache.t3.micro"
+  default     = "cache.t3.small"
 }
 
 variable "redis_num_nodes" {
@@ -85,6 +85,11 @@ variable "traefik_resources" {
     cpu_request = "32m"
     memory_request = "64M"
   }
+}
+
+variable "enable_traefik" {
+  description = "Whether or not to include Traefik ingress"
+  default     = "1"
 }
 
 variable "codecov_yml" {

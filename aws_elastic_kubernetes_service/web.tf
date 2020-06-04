@@ -34,7 +34,7 @@ resource "kubernetes_deployment" "web" {
         }
         container {
           name  = "web"
-          image = "codecov/enterprise:v${var.codecov_version}"
+          image = "codecov/enterprise-web:v${var.codecov_version}"
           args  = ["web"]
           port {
             container_port = 5000
@@ -46,6 +46,10 @@ resource "kubernetes_deployment" "web" {
                 field_path = "status.hostIP"
               }
             }
+          }
+          env {
+            name = "STATSD_PORT"
+            value = "8125"
           }
           env {
             name  = "SERVICES__DATABASE_URL"

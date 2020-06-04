@@ -34,3 +34,7 @@ module "vpc" {
   )
 }
 
+# Include NAT gateway public IP(s) in output if required for firewall rules / access restrictions
+output "nat_gateway_ips" {
+  value = module.vpc.nat_public_ips
+}
