@@ -76,10 +76,6 @@ variable "worker_resources" {
   }
 }
 
-variable "enable_traefik" {
-  default = 1
-}
-
 variable "traefik_resources" {
   type = map
   default = {

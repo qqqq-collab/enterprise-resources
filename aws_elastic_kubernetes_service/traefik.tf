@@ -1,32 +1,3 @@
-resource "kubernetes_service_account" "traefik_ingress_controller" {
-  count = var.enable_traefik
-  metadata {
-    name      = "traefik"
-    namespace = "default"
-    annotations = var.resource_tags
-  }
-}
-
-resource "kubernetes_cluster_role_binding" "traefik_ingress_controller" {
-  count = var.enable_traefik
-  metadata {
-    name = "traefik"
-    annotations = var.resource_tags
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = kubernetes_service_account.traefik_ingress_controller[0].metadata[0].name
-    namespace = kubernetes_service_account.traefik_ingress_controller[0].metadata[0].namespace
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-
-    # giving cluster-admin is too much access for traefik.
-    name = "cluster-admin"
-  }
-}
-
 data "template_file" "traefik-toml-http" {
   count    = 1 - var.enable_https
   template = <<EOF
@@ -124,7 +95,7 @@ resource "kubernetes_deployment" "traefik" {
           # run in the web node pool
           "kubernetes.io/role" = "web"
         }
-        service_account_name = kubernetes_service_account.traefik_ingress_controller[0].metadata[0].name
+        service_account_name = kubernetes_service_account.traefik.metadata[0].name
         volume {
           name = "config"
           config_map {
@@ -138,9 +109,9 @@ resource "kubernetes_deployment" "traefik" {
           }
         }
         volume {
-          name = kubernetes_service_account.traefik_ingress_controller[0].default_secret_name
+          name = kubernetes_service_account.traefik.default_secret_name
           secret {
-            secret_name = kubernetes_service_account.traefik_ingress_controller[0].default_secret_name
+            secret_name = kubernetes_service_account.traefik.default_secret_name
           }
         }
         container {
@@ -192,7 +163,7 @@ resource "kubernetes_deployment" "traefik" {
           # https://github.com/kubernetes/kubernetes/issues/27973
           # https://github.com/terraform-providers/terraform-provider-kubernetes/issues/38
           volume_mount {
-            name       = kubernetes_service_account.traefik_ingress_controller[0].default_secret_name
+            name       = kubernetes_service_account.traefik.default_secret_name
             read_only  = "true"
             mount_path = "/var/run/secrets/kubernetes.io/serviceaccount"
           }
