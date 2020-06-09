@@ -54,3 +54,10 @@ resource "kubernetes_cluster_role_binding" "traefik" {
     name      = kubernetes_cluster_role.traefik.metadata[0].name
   }
 }
+
+resource "kubernetes_service_account" "codecov" {
+  metadata {
+    name      = "codecov-enterprise"
+    namespace = "default"
+  }
+}

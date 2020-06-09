@@ -20,6 +20,13 @@ resource "kubernetes_deployment" "worker" {
         node_selector = {
           "kubernetes.io/role" = "worker"
         }
+        service_account_name = kubernetes_service_account.codecov.metadata[0].name
+        volume {
+          name = kubernetes_service_account.codecov.default_secret_name
+          secret {
+            secret_name = kubernetes_service_account.codecov.default_secret_name
+          }
+        }
         volume {
           name = "codecov-yml"
           secret {
@@ -65,22 +72,8 @@ resource "kubernetes_deployment" "worker" {
             value = aws_s3_bucket.minio.id
           }
           env {
-            name = "SERVICES__MINIO__ACCESS_KEY_ID"
-            value_from {
-              secret_key_ref {
-                name = kubernetes_secret.minio-access-key.metadata[0].name
-                key  = "MINIO_ACCESS_KEY"
-              }
-            }
-          }
-          env {
-            name = "SERVICES__MINIO__SECRET_ACCESS_KEY"
-            value_from {
-              secret_key_ref {
-                name = kubernetes_secret.minio-secret-key.metadata[0].name
-                key  = "MINIO_SECRET_KEY"
-              }
-            }
+            name  = "SERVICES__MINIO__IAM_AUTH"
+            value = "true"
           }
           resources {
             limits {
@@ -102,6 +95,15 @@ resource "kubernetes_deployment" "worker" {
             name       = "scm-ca-cert"
             read_only  = "true"
             mount_path = "/cert"
+          }
+
+          # when using terraform, you must explicitly mount the service account secret volume
+          # https://github.com/kubernetes/kubernetes/issues/27973
+          # https://github.com/terraform-providers/terraform-provider-kubernetes/issues/38
+          volume_mount {
+            name       = kubernetes_service_account.codecov.default_secret_name
+            read_only  = "true"
+            mount_path = "/var/run/secrets/kubernetes.io/serviceaccount"
           }
         }
       }
