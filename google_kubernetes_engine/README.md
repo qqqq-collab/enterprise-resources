@@ -54,7 +54,7 @@ defined in a `terraform.tfvars` file.  More info on
 | `gcloud_project` | Google cloud project name | required |
 | `region` | Google cloud region | us-east4 |
 | `zone` | Default Google cloud zone for zone-specific services | us-east4a |
-| `codecov_version` | Version of codecov enterprise to deploy | 4.4.7 |
+| `codecov_version` | Version of codecov enterprise to deploy | 4.5.0 |
 | `cluster_name` | Google Kubernetes Engine (GKE) cluster name | default-codecov-cluster |
 | `web_node_pool_count` | Number of nodes to create in the web node pool | 1 |
 | `worker_node_pool_count` | Number of nodes to create in the worker node pool | 1 |
@@ -62,12 +62,11 @@ defined in a `terraform.tfvars` file.  More info on
 | `web_resources` | Map of resources for web k8s deployment | See `variables.tf` |
 | `worker_resources` | Map of resources for worker k8s deployment | See `variables.tf` |
 | `traefik_resources` | Map of resources for traefik k8s deployment | See `variables.tf` |
+| `enable_traefik` | Whether to include Traefik for ingress and HTTPS | 1 |
 | `minio_bucket_name` | Name of GCS bucket to create for minio | required |
 | `minio_bucket_location` | Name of GCS bucket to create for minio | US |
 | `minio_bucket_force_destroy` | Required to allow destroying a non-empty bucket | false |
-| `redis_instance_name` | Name used for redis instance | required |
 | `redis_memory_size` | Amount of memory in GB to allocate for redis instance | 5 |
-| `postgres_instance_name` | Name used for postgres instance | required |
 | `postgres_instance_type` | Instance type used for postgres | db-f1-micro |
 | `codecov_yml` | Path to your codecov.yml | required |
 | `ingress_host` | Hostname used for http(s) ingress. (ex: `codecov.yourdomain.com`) | |
@@ -82,6 +81,23 @@ defined in a `terraform.tfvars` file.  More info on
 If `scm_ca_cert` is configured, it will be available to Codecov at
 `/cert/scm_ca_cert.pem`.  Include this path in your `codecov.yml` in the scm
 config.
+
+### Instance Types
+
+The default instance types and number of instances are the minimum to get
+the Codecov application up and running.  Tuning these will be required,
+dependent on your specific use-case.
+
+### Traefik
+
+Traefik is included for ingress in order to support HTTPS, streamline the setup, 
+and make this stack as turn-key as possible.  It can be excluded in favor of 
+using GCP services to manage your domain and certificate.  To disable Traefik,
+include this in your `terraform.tfvars` file:
+
+```
+enable_traefik = 0
+```
 
 ## Executing terraform
 

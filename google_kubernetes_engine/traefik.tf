@@ -29,6 +29,7 @@ EOF
 }
 
 resource "kubernetes_config_map" "traefik-toml" {
+  count = var.enable_traefik
   metadata {
     name = "traefik-config"
     annotations = var.resource_tags
@@ -45,6 +46,7 @@ resource "kubernetes_config_map" "traefik-toml" {
 }
 
 resource "kubernetes_secret" "traefik-tls" {
+  count = var.enable_traefik
   metadata {
     name = "traefik-tls"
     annotations = var.resource_tags
@@ -57,6 +59,7 @@ resource "kubernetes_secret" "traefik-tls" {
 }
 
 resource "kubernetes_deployment" "traefik" {
+  count = var.enable_traefik
   metadata {
     name = "traefik"
     annotations = var.resource_tags
@@ -166,6 +169,7 @@ resource "kubernetes_deployment" "traefik" {
 }
 
 resource "kubernetes_service" "traefik" {
+  count = var.enable_traefik
   metadata {
     name = "traefik"
     annotations = var.resource_tags
@@ -183,12 +187,6 @@ resource "kubernetes_service" "traefik" {
       port        = "443"
       target_port = "443"
     }
-    port {
-      name        = "admin"
-      protocol    = "TCP"
-      port        = "8080"
-      target_port = "8080"
-    }
     selector = {
       app = "traefik"
     }
@@ -197,6 +195,7 @@ resource "kubernetes_service" "traefik" {
 }
 
 resource "kubernetes_ingress" "traefik" {
+  count = var.enable_traefik
   metadata {
     name = "traefik"
     annotations = merge({
@@ -222,6 +221,5 @@ resource "kubernetes_ingress" "traefik" {
 }
 
 output "ingress-ip" {
-  value = kubernetes_service.traefik.load_balancer_ingress[0].ip
+  value = length(kubernetes_service.traefik) > 0 ? kubernetes_service.traefik[0].load_balancer_ingress[0].ip : null
 }
-

@@ -1,5 +1,5 @@
 resource "google_redis_instance" "codecov" {
-  name           = var.redis_instance_name
+  name           = "codecov-enterprise-${random_pet.databases.id}"
   memory_size_gb = var.redis_memory_size
 
   labels = var.resource_tags
@@ -9,13 +9,13 @@ resource "google_redis_instance" "codecov" {
 # consistent.  For tasks that require recreation of the db resource, using the 
 # same name often fails because it remains reserved until the record of the db
 # instance is fully purged from google's metadata.
-resource "random_pet" "postgres" {
+resource "random_pet" "databases" {
   length    = "2"
   separator = "-"
 }
 
 resource "google_sql_database_instance" "codecov" {
-  name             = "${var.postgres_instance_name}-${random_pet.postgres.id}"
+  name             = "codecov-enterprise-${random_pet.databases.id}"
   database_version = "POSTGRES_9_6"
   region           = var.region
 

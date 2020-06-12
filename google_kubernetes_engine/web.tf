@@ -68,6 +68,10 @@ resource "kubernetes_deployment" "web" {
             }
           }
           env {
+            name = "STATSD_PORT"
+            value = "8125"
+          }
+          env {
             name  = "SERVICES__DATABASE_URL"
             value = "postgres://${google_sql_user.codecov.name}:${google_sql_user.codecov.password}@127.0.0.1:5432/${google_sql_database.codecov.name}"
           }
