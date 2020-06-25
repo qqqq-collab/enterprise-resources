@@ -84,7 +84,7 @@ config.
 
 ### Instance Types
 
-The default instance types and number of instances are the minimum to get
+The default node pool machine type and number of instances are the minimum to get
 the Codecov application up and running.  Tuning these will be required,
 dependent on your specific use-case.
 
@@ -98,6 +98,13 @@ include this in your `terraform.tfvars` file:
 ```
 enable_traefik = 0
 ```
+
+### Granting Codecov access to internal resources
+
+If your organization requires creating firewall rules to grant Codecov access
+to your internal resources, the IP address for the NAT gateway can be found in
+the terraform output.  All requests from Codecov Enterprise will originate from
+this address.
 
 ## Executing terraform
 
