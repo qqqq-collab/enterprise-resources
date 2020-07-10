@@ -41,21 +41,6 @@ data "aws_iam_policy_document" "minio-s3" {
   }
 }
 
-resource "aws_iam_user" "minio-s3" {
-  name = "minio-codecov-enterprise"
-
-  tags = var.resource_tags
-}
-
-resource "aws_iam_access_key" "minio-s3" {
-  user = aws_iam_user.minio-s3.name
-}
-
-resource "aws_iam_user_policy_attachment" "minio-s3" {
-  user = aws_iam_user.minio-s3.name
-  policy_arn = aws_iam_policy.minio-s3.arn
-}
-
 resource "random_pet" "minio-bucket-suffix" {
   length    = "2"
   separator = "-"
@@ -66,24 +51,4 @@ resource "aws_s3_bucket" "minio" {
   acl    = "private"
 
   tags = var.resource_tags
-}
-
-resource "kubernetes_secret" "minio-access-key" {
-  metadata {
-    name = "minio-access-key"
-    annotations = var.resource_tags
-  }
-  data = {
-    MINIO_ACCESS_KEY = aws_iam_access_key.minio-s3.id
-  }
-}
-
-resource "kubernetes_secret" "minio-secret-key" {
-  metadata {
-    name = "minio-secret-key"
-    annotations = var.resource_tags
-  }
-  data = {
-    MINIO_SECRET_KEY = aws_iam_access_key.minio-s3.secret
-  }
 }
