@@ -13,16 +13,14 @@ resource "azurerm_postgresql_server" "codecov" {
 
   sku_name = var.postgres_sku
 
-  storage_profile {
-    storage_mb            = var.postgres_storage_profile["storage_mb"]
-    backup_retention_days = var.postgres_storage_profile["backup_retention_days"]
-    geo_redundant_backup  = var.postgres_storage_profile["geo_redundant_backup"]
-  }
+  storage_mb                   = var.postgres_storage_profile["storage_mb"]
+  backup_retention_days        = var.postgres_storage_profile["backup_retention_days"]
+  geo_redundant_backup_enabled = var.postgres_storage_profile["geo_redundant_backup_enabled"]
 
   administrator_login          = "codecov"
   administrator_login_password = random_password.postgres-password.result
   version                      = "9.6"
-  ssl_enforcement              = "Disabled"
+  ssl_enforcement_enabled      = "false"
 
   tags = var.resource_tags
 }

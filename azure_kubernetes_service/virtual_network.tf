@@ -10,7 +10,9 @@ resource "azurerm_subnet" "codecov" {
   name                 = "codecov"
   virtual_network_name = azurerm_virtual_network.codecov.name
   resource_group_name  = azurerm_resource_group.codecov-enterprise.name
-  address_prefix       = "10.1.8.0/21"
+  address_prefixes     = [
+    "10.1.8.0/21"
+  ]
   service_endpoints = [
     "Microsoft.Sql",
     "Microsoft.Storage",

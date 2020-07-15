@@ -39,9 +39,9 @@ variable "postgres_sku" {
 variable "postgres_storage_profile" {
   description = "Storage profile for PostgreSQL DB"
   default = {
-    storage_mb            = "5120"
-    backup_retention_days = "7"
-    geo_redundant_backup  = "Disabled"
+    storage_mb                   = "5120"
+    backup_retention_days        = "7"
+    geo_redundant_backup_enabled = "false"
   }
 }
 
