@@ -59,7 +59,7 @@ variable "web_resources" {
 variable "worker_resources" {
   type = map
   default = {
-    replicas = 4
+    replicas = 3
     cpu_limit = "512m"
     memory_limit = "2048M"
     cpu_request = "256m"
@@ -87,6 +87,11 @@ variable "traefik_resources" {
     cpu_request = "32m"
     memory_request = "64M"
   }
+}
+
+variable "enable_traefik" {
+  description = "Whether or not to include Traefik ingress"
+  default     = "1"
 }
 
 variable "codecov_yml" {

@@ -42,6 +42,10 @@ resource "kubernetes_deployment" "worker" {
             }
           }
           env {
+            name = "STATSD_PORT"
+            value = "8125"
+          }
+          env {
             name  = "DATABASE_USERNAME"
             value = local.postgres_username
           }
