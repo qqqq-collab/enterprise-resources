@@ -14,7 +14,7 @@ variable "zone" {
 
 variable "codecov_version" {
   description = "Version of codecov enterprise to deploy"
-  default     = "4.4.12"
+  default     = "4.5.0"
 }
 
 variable "cluster_name" {
@@ -70,6 +70,11 @@ variable "traefik_resources" {
   }
 }
 
+variable "enable_traefik" {
+  description = "Whether or not to include Traefik ingress"
+  default     = "1"
+}
+
 variable "minio_bucket_name" {
   description = "Name of GCS bucket to create for minio"
 }
@@ -84,17 +89,9 @@ variable "minio_bucket_force_destroy" {
   default     = "false"
 }
 
-variable "redis_instance_name" {
-  description = "Name used for redis instance"
-}
-
 variable "redis_memory_size" {
   description = "Memory size in GB for redis instance"
   default     = "5"
-}
-
-variable "postgres_instance_name" {
-  description = "Name used for postgres instance"
 }
 
 variable "postgres_instance_type" {
