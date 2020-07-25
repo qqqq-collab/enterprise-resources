@@ -39,9 +39,9 @@ variable "postgres_sku" {
 variable "postgres_storage_profile" {
   description = "Storage profile for PostgreSQL DB"
   default = {
-    storage_mb            = "5120"
-    backup_retention_days = "7"
-    geo_redundant_backup  = "Disabled"
+    storage_mb                   = "5120"
+    backup_retention_days        = "7"
+    geo_redundant_backup_enabled = "false"
   }
 }
 
@@ -59,7 +59,7 @@ variable "web_resources" {
 variable "worker_resources" {
   type = map
   default = {
-    replicas = 4
+    replicas = 3
     cpu_limit = "512m"
     memory_limit = "2048M"
     cpu_request = "256m"
@@ -87,6 +87,11 @@ variable "traefik_resources" {
     cpu_request = "32m"
     memory_request = "64M"
   }
+}
+
+variable "enable_traefik" {
+  description = "Whether or not to include Traefik ingress"
+  default     = "1"
 }
 
 variable "codecov_yml" {

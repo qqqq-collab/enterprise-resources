@@ -48,7 +48,7 @@ for a fully robust deployment.
 
 Configuration of Codecov enterprise is handled through a YAML config file.
 See [configuring codecov.yml](https://docs.codecov.io/docs/configuration) for 
-more info.  Refer to this example [codecov.yml](../codecov.yml.example) for the
+more info.  Refer to this example [codecov.yml](codecov.yml.example) for the
 minimum necessary configuration.
 
 The terraform stack is configured using terraform variables which can be
@@ -70,6 +70,7 @@ defined in a `terraform.tfvars` file.  More info on
 | `worker_resources` | Map of resources for worker k8s deployment | See `variables.tf` |
 | `minio_resources` | Map of resources for minio k8s deployment | See `variables.tf` |
 | `traefik_resources` | Map of resources for traefik k8s deployment | See `variables.tf` |
+| `enable_traefik` | Whether to include Traefik for ingress and HTTPS | 1 |
 | `codecov_yml` | Path to your codecov.yml | codecov.yml |
 | `ingress_host` | Hostname used for http(s) ingress | |
 | `enable_https` | Enables https ingress.  Requires TLS cert and key | 0 |
@@ -84,6 +85,30 @@ defined in a `terraform.tfvars` file.  More info on
 If `scm_ca_cert` is configured, it will be available to Codecov at
 `/cert/scm_ca_cert.pem`.  Include this path in your `codecov.yml` in the scm
 config.
+
+### Instance Types
+
+The default node pool VM size and number of instances are the minimum to get
+the Codecov application up and running.  Tuning these will be required,
+dependent on your specific use-case.
+
+### Traefik
+
+Traefik is included for ingress in order to support HTTPS, streamline the setup, 
+and make this stack as turn-key as possible.  It can be excluded in favor of 
+using GCP services to manage your domain and certificate.  To disable Traefik,
+include this in your `terraform.tfvars` file:
+
+```
+enable_traefik = 0
+```
+
+### Granting Codecov access to internal resources
+
+If your organization requires creating firewall rules to grant Codecov access
+to your internal resources, the IP address for the NAT gateway can be found in
+the terraform output as `egress-ip`.  All requests from Codecov Enterprise 
+will originate from this address.
 
 ## Executing terraform
 

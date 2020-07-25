@@ -1,3 +1,7 @@
+locals {
+  node_resource_group_name = "codecov-enterprise-nodes"
+}
+
 resource "azurerm_resource_group" "codecov-enterprise" {
   name     = "codecov-enterprise"
   location = var.location
@@ -7,6 +11,7 @@ resource "azurerm_kubernetes_cluster" "codecov-enterprise" {
   name                = var.cluster_name
   location            = azurerm_resource_group.codecov-enterprise.location
   resource_group_name = azurerm_resource_group.codecov-enterprise.name
+  node_resource_group = local.node_resource_group_name
   dns_prefix          = "codecov-enterprise"
 
   default_node_pool {
@@ -38,6 +43,15 @@ resource "azurerm_kubernetes_cluster" "codecov-enterprise" {
   }
 
   tags = var.resource_tags
+}
+
+data "azurerm_public_ip" "egress-ip" {
+  name = split("/",sort(azurerm_kubernetes_cluster.codecov-enterprise.network_profile[0].load_balancer_profile[0].effective_outbound_ips)[0])[8]
+  resource_group_name = local.node_resource_group_name
+}
+
+output "egress-ip" {
+  value = data.azurerm_public_ip.egress-ip.ip_address
 }
 
 # write out a .kubeconfig for kubectl
